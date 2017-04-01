@@ -1,0 +1,86 @@
+{
+  "_args": [
+    [
+      {
+        "raw": "react-native-media-editor@git://github.com/Takamichi-tsutsumi/react-native-media-editor.git",
+        "scope": null,
+        "escapedName": "react-native-media-editor",
+        "name": "react-native-media-editor",
+        "rawSpec": "git://github.com/Takamichi-tsutsumi/react-native-media-editor.git",
+        "spec": "git://github.com/Takamichi-tsutsumi/react-native-media-editor.git",
+        "type": "hosted",
+        "hosted": {
+          "type": "github",
+          "ssh": "git@github.com:Takamichi-tsutsumi/react-native-media-editor.git",
+          "sshUrl": "git+ssh://git@github.com/Takamichi-tsutsumi/react-native-media-editor.git",
+          "httpsUrl": "git+https://github.com/Takamichi-tsutsumi/react-native-media-editor.git",
+          "gitUrl": "git://github.com/Takamichi-tsutsumi/react-native-media-editor.git",
+          "shortcut": "github:Takamichi-tsutsumi/react-native-media-editor",
+          "directUrl": "https://raw.githubusercontent.com/Takamichi-tsutsumi/react-native-media-editor/master/package.json"
+        }
+      },
+      "/Users/uu107017/.ghq/github.com/Takamichi-tsutsumi/onocolo-client"
+    ]
+  ],
+  "_from": "git://github.com/Takamichi-tsutsumi/react-native-media-editor.git",
+  "_id": "react-native-media-editor@0.0.1",
+  "_inCache": true,
+  "_location": "/react-native-media-editor",
+  "_phantomChildren": {},
+  "_requested": {
+    "raw": "react-native-media-editor@git://github.com/Takamichi-tsutsumi/react-native-media-editor.git",
+    "scope": null,
+    "escapedName": "react-native-media-editor",
+    "name": "react-native-media-editor",
+    "rawSpec": "git://github.com/Takamichi-tsutsumi/react-native-media-editor.git",
+    "spec": "git://github.com/Takamichi-tsutsumi/react-native-media-editor.git",
+    "type": "hosted",
+    "hosted": {
+      "type": "github",
+      "ssh": "git@github.com:Takamichi-tsutsumi/react-native-media-editor.git",
+      "sshUrl": "git+ssh://git@github.com/Takamichi-tsutsumi/react-native-media-editor.git",
+      "httpsUrl": "git+https://github.com/Takamichi-tsutsumi/react-native-media-editor.git",
+      "gitUrl": "git://github.com/Takamichi-tsutsumi/react-native-media-editor.git",
+      "shortcut": "github:Takamichi-tsutsumi/react-native-media-editor",
+      "directUrl": "https://raw.githubusercontent.com/Takamichi-tsutsumi/react-native-media-editor/master/package.json"
+    }
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "git://github.com/Takamichi-tsutsumi/react-native-media-editor.git#f85bdcefcc405c1c01612b8b65cfd6df345f2a2b",
+  "_shasum": "e368236db7301d7a1676119ee4f0655a89311610",
+  "_shrinkwrap": null,
+  "_spec": "react-native-media-editor@git://github.com/Takamichi-tsutsumi/react-native-media-editor.git",
+  "_where": "/Users/uu107017/.ghq/github.com/Takamichi-tsutsumi/onocolo-client",
+  "author": {
+    "name": "Takamichi-tsutsumi",
+    "email": "1220t.takamichi@gmail.com"
+  },
+  "bugs": {
+    "url": "https://github.com/takamichi-tsutsumi/react-native-media-editor/issues"
+  },
+  "dependencies": {},
+  "description": "Media file editor for ReactNative",
+  "devDependencies": {},
+  "gitHead": "f85bdcefcc405c1c01612b8b65cfd6df345f2a2b",
+  "homepage": "https://github.com/takamichi-tsutsumi/react-native-media-editor#readme",
+  "keywords": [
+    "react-native"
+  ],
+  "license": "MIT",
+  "main": "MediaEditor.js",
+  "name": "react-native-media-editor",
+  "optionalDependencies": {},
+  "private": false,
+  "readme": "\n# react-native-media-editor\n\nTo edit video or image\n\n## Features\n- Add text on image, video like snapchat or instagram\n\n## Usage\n\n## WIP\n- [ ] iOS add text on video\n- [ ] Android add text on video\n\n",
+  "readmeFilename": "README.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/takamichi-tsutsumi/react-native-media-editor.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "0.0.1"
+}
