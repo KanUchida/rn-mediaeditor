@@ -144,12 +144,12 @@ RCT_EXPORT_METHOD
   CGRect textRect;
   if ([isFirstTextVertical integerValue] == 1) {
     NSLog(@"Vertical string");
-    textContainer = CGRectMake(point.x, point.y, size.height * 2, size.width + fontSize * 2);
+    textContainer = CGRectMake(point.x, point.y, size.height * 2, size.height * (text.length + 1) / 2);
     CGContextFillRect(
       UIGraphicsGetCurrentContext(),
       textContainer
     );
-    textRect = CGRectMake(point.x + fontSize/2, point.y + size.height / 4, size.height, size.width + fontSize * 2);
+    textRect = CGRectMake(point.x + fontSize/2, point.y + size.height / 4, size.height, size.height * text.length);
   } else {
     textContainer = CGRectMake(point.x, point.y, size.width + fontSize * 1, size.height * 1.5);
     CGContextFillRect(
