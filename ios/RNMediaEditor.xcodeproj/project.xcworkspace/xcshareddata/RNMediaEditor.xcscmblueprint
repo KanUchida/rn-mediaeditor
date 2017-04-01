@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "23499EB3162C690A6419BF64518F5FB272170D84",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "C751AC29B6ACD913FAE7D2DB563303129EC8B128" : 9223372036854775807,
+    "23499EB3162C690A6419BF64518F5FB272170D84" : 9223372036854775807
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "66CA3B60-B124-4A2D-AC71-B9AA5C41F6B4",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "C751AC29B6ACD913FAE7D2DB563303129EC8B128" : "..",
+    "23499EB3162C690A6419BF64518F5FB272170D84" : "react-native-media-editor\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "RNMediaEditor",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "ios\/RNMediaEditor.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "github.com:Takamichi-tsutsumi\/rn-mediaeditor.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "23499EB3162C690A6419BF64518F5FB272170D84"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "ssh:\/\/github.com\/Takamichi-tsutsumi\/onocolo-client",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "C751AC29B6ACD913FAE7D2DB563303129EC8B128"
+    }
+  ]
+}
