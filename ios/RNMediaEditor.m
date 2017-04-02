@@ -277,7 +277,7 @@ RCT_EXPORT_METHOD
   // create font and size of font
   [subtitle1Text setFont:@"Helvetica-Bold"];
   NSNumber *fontSizeNumber1 = [firstText objectForKey:@"fontSize"];
-  NSInteger fontSize1 = abs(fontSizeNumber1.integerValue);
+  NSInteger fontSize1 = abs(fontSizeNumber1.integerValue * 0.9);
   UIFont *font1 = [UIFont fontWithName:@"Helvetica-Bold" size:fontSize1];
   CGSize textSize1 = [text1 sizeWithFont:font1];
   NSNumber *topN1 = [firstText objectForKey:@"top"];
@@ -288,12 +288,14 @@ RCT_EXPORT_METHOD
   NSNumber *isFirstTextVertical = [firstText objectForKey:@"vertical"];
   
   if ([isFirstTextVertical integerValue] == 1) {
-    [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, topN1.integerValue, textSize1.width, textSize1.height * (text1.length + 1) / 2)];
+    [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, topN1.integerValue, size.width, size.height)];
   } else {
-    [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, topN1.integerValue, textSize1.width + fontSize1, textSize1.height * 1.5)];
+    [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, topN1.integerValue, size.width, textSize1.height * 1.2)];
   }
   [subtitle1Text setString:text1];
-  [subtitle1Text setAlignmentMode:kCAAlignmentJustified];
+  [subtitle1Text setAlignmentMode:kCAAlignmentLeft];
+  [subtitle1Text setContentsGravity:kCAGravityCenter];
+
 
   UIColor *textColor1 =
   [self colorFromHexString:[firstText objectForKey:@"textColor"] Alpha:1.0];
@@ -303,7 +305,7 @@ RCT_EXPORT_METHOD
   float alpha1 = backgroundOpacityNumber1.floatValue;
 
   UIColor *backgroundColor1 = [self colorFromHexString:[firstText objectForKey:@"backgroundColor"] Alpha:alpha1];
-  [subtitle1Text setBackgroundColor:[backgroundColor1 CGColor]];
+//  [subtitle1Text setBackgroundColor:[backgroundColor1 CGColor]];
 
 
   // create text2
@@ -315,7 +317,7 @@ RCT_EXPORT_METHOD
   // create font and size of font
   [subtitle2Text setFont:@"Helvetica-Bold"];
   NSNumber *fontSizeNumber2 = [secondText objectForKey:@"fontSize"];
-  NSInteger fontSize2 = abs(fontSizeNumber2.integerValue);
+  NSInteger fontSize2 = abs(fontSizeNumber2.integerValue * 0.9);
   UIFont *font2 = [UIFont fontWithName:@"Helvetica-Bold" size:fontSize2];
   CGSize textSize2 = [text2 sizeWithFont:font2];
   NSNumber *topN2 = [secondText objectForKey:@"top"];
@@ -323,10 +325,9 @@ RCT_EXPORT_METHOD
   [subtitle2Text setFontSize:font2.pointSize];
 
   // TODO 文字の場所をコントロールする
-  //  [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, topN1.integerValue, textSize1.width + fontSize1*2, textSize1.height * 2)];
-  [subtitle2Text setFrame:CGRectMake(abs(leftN2.integerValue), abs(topN2.integerValue), textSize2.width, textSize2.height)];
+  [subtitle2Text setFrame:CGRectMake(leftN2.integerValue, topN2.integerValue, size.width, size.height)];
   [subtitle2Text setString:text2];
-  [subtitle2Text setAlignmentMode:kCAAlignmentJustified];
+  [subtitle2Text setAlignmentMode:kCAAlignmentLeft];
 
   UIColor *textColor2 =
   [self colorFromHexString:[secondText objectForKey:@"textColor"] Alpha:1.0];
@@ -336,18 +337,19 @@ RCT_EXPORT_METHOD
   float alpha2 = backgroundOpacityNumber2.floatValue;
 
   UIColor *backgroundColor2 = [self colorFromHexString:[secondText objectForKey:@"backgroundColor"] Alpha:alpha2];
-  [subtitle2Text setBackgroundColor:[backgroundColor2 CGColor]];
+//  [subtitle2Text setBackgroundColor:[backgroundColor2 CGColor]];
 
 
 
   // create overlay
   CALayer *overlayLayer = [CALayer layer];
+  overlayLayer.frame = CGRectMake(0, 0, size.width, size.height);
   [overlayLayer addSublayer:subtitle1Text];
   [overlayLayer addSublayer:subtitle2Text];
-  overlayLayer.frame = CGRectMake(0, 0, size.width, size.height);
   [overlayLayer setMasksToBounds:YES];
   [overlayLayer setOpacity:0.0];
   [overlayLayer displayIfNeeded];
+  [overlayLayer setGeometryFlipped:YES];
   
   CMTime videoDuration = videoAsset.duration;
 
@@ -364,6 +366,8 @@ RCT_EXPORT_METHOD
 
   CALayer *parentLayer = [CALayer layer];
   CALayer *videoLayer = [CALayer layer];
+  parentLayer.anchorPoint = CGPointMake(0, 0);
+  videoLayer.anchorPoint = CGPointMake(0, 0);
   parentLayer.frame = CGRectMake(0, 0, size.width, size.height);
   videoLayer.frame = CGRectMake(0, 0, size.width, size.height);
   [parentLayer addSublayer:videoLayer];
