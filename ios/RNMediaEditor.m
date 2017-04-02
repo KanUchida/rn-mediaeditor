@@ -252,10 +252,13 @@ RCT_EXPORT_METHOD
 
   AVMutableComposition *mixComposition = [[AVMutableComposition alloc] init];
   AVMutableCompositionTrack *mutableCompositionVideoTrack = [mixComposition addMutableTrackWithMediaType:AVMediaTypeVideo preferredTrackID:kCMPersistentTrackID_Invalid];
+  AVMutableCompositionTrack *mutableCompositionAudioTrack = [mixComposition addMutableTrackWithMediaType:AVMediaTypeAudio preferredTrackID:kCMPersistentTrackID_Invalid];
 
   AVAssetTrack *baseVideoTrack = [[videoAsset tracksWithMediaType:AVMediaTypeVideo] objectAtIndex:0];
+  AVAssetTrack *baseAudioTrack = [[videoAsset tracksWithMediaType:AVMediaTypeAudio] objectAtIndex:0];
 
   [mutableCompositionVideoTrack insertTimeRange:CMTimeRangeMake(kCMTimeZero, baseVideoTrack.timeRange.duration) ofTrack:baseVideoTrack atTime:kCMTimeZero error:nil];
+  [mutableCompositionAudioTrack insertTimeRange:CMTimeRangeMake(kCMTimeZero, baseAudioTrack.timeRange.duration) ofTrack:baseAudioTrack atTime:kCMTimeZero error:nil];
 
   // prpare instruction
   AVMutableVideoCompositionInstruction *mainInstruction = [AVMutableVideoCompositionInstruction videoCompositionInstruction];
@@ -268,22 +271,29 @@ RCT_EXPORT_METHOD
 
   // create text1
   CATextLayer *subtitle1Text = [[CATextLayer alloc] init];
+  subtitle1Text.contentsScale = [[UIScreen mainScreen] scale];
   NSString *text1 = [firstText objectForKey:@"text"];
 
   // create font and size of font
   [subtitle1Text setFont:@"Helvetica-Bold"];
   NSNumber *fontSizeNumber1 = [firstText objectForKey:@"fontSize"];
   NSInteger fontSize1 = abs(fontSizeNumber1.integerValue);
-  UIFont *font1 = [UIFont boldSystemFontOfSize:fontSize1];
+  UIFont *font1 = [UIFont fontWithName:@"Helvetica-Bold" size:fontSize1];
   CGSize textSize1 = [text1 sizeWithFont:font1];
   NSNumber *topN1 = [firstText objectForKey:@"top"];
   NSNumber *leftN1 = [firstText objectForKey:@"left"];
-  [subtitle1Text setFontSize:fontSize1];
+  [subtitle1Text setFontSize:font1.pointSize];
+  
 
-//  [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, topN1.integerValue, textSize1.width + fontSize1*2, textSize1.height * 2)];
-  [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, topN1.integerValue, size.width, 30)];
+  NSNumber *isFirstTextVertical = [firstText objectForKey:@"vertical"];
+  
+  if ([isFirstTextVertical integerValue] == 1) {
+    [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, topN1.integerValue, textSize1.width, textSize1.height * (text1.length + 1) / 2)];
+  } else {
+    [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, topN1.integerValue, textSize1.width + fontSize1, textSize1.height * 1.5)];
+  }
   [subtitle1Text setString:text1];
-  [subtitle1Text setAlignmentMode:kCAAlignmentCenter];
+  [subtitle1Text setAlignmentMode:kCAAlignmentJustified];
 
   UIColor *textColor1 =
   [self colorFromHexString:[firstText objectForKey:@"textColor"] Alpha:1.0];
@@ -298,23 +308,25 @@ RCT_EXPORT_METHOD
 
   // create text2
   CATextLayer *subtitle2Text = [[CATextLayer alloc] init];
+  subtitle2Text.contentsScale = [[UIScreen mainScreen] scale];
+
   NSString *text2 = [secondText objectForKey:@"text"];
 
   // create font and size of font
   [subtitle2Text setFont:@"Helvetica-Bold"];
   NSNumber *fontSizeNumber2 = [secondText objectForKey:@"fontSize"];
   NSInteger fontSize2 = abs(fontSizeNumber2.integerValue);
-  UIFont *font2 = [UIFont boldSystemFontOfSize:fontSize2];
+  UIFont *font2 = [UIFont fontWithName:@"Helvetica-Bold" size:fontSize2];
   CGSize textSize2 = [text2 sizeWithFont:font2];
   NSNumber *topN2 = [secondText objectForKey:@"top"];
   NSNumber *leftN2 = [secondText objectForKey:@"left"];
-  [subtitle2Text setFontSize:fontSize2];
+  [subtitle2Text setFontSize:font2.pointSize];
 
   // TODO 文字の場所をコントロールする
   //  [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, topN1.integerValue, textSize1.width + fontSize1*2, textSize1.height * 2)];
-  [subtitle2Text setFrame:CGRectMake(abs(leftN2.integerValue), abs(topN2.integerValue), size.width, 30)];
+  [subtitle2Text setFrame:CGRectMake(abs(leftN2.integerValue), abs(topN2.integerValue), textSize2.width, textSize2.height)];
   [subtitle2Text setString:text2];
-  [subtitle2Text setAlignmentMode:kCAAlignmentCenter];
+  [subtitle2Text setAlignmentMode:kCAAlignmentJustified];
 
   UIColor *textColor2 =
   [self colorFromHexString:[secondText objectForKey:@"textColor"] Alpha:1.0];
@@ -334,7 +346,20 @@ RCT_EXPORT_METHOD
   [overlayLayer addSublayer:subtitle2Text];
   overlayLayer.frame = CGRectMake(0, 0, size.width, size.height);
   [overlayLayer setMasksToBounds:YES];
+  [overlayLayer setOpacity:0.0];
+  [overlayLayer displayIfNeeded];
+  
+  CMTime videoDuration = videoAsset.duration;
 
+  CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"opacity"];
+  [animation setDuration:0];
+  [animation setFromValue:[NSNumber numberWithFloat:0.0]];
+  [animation setToValue:[NSNumber numberWithFloat:1.0]];
+  [animation setBeginTime:CMTimeGetSeconds(videoDuration)-3];
+  [animation setRemovedOnCompletion:NO];
+  [animation setFillMode:kCAFillModeForwards];
+  [overlayLayer addAnimation:animation forKey:@"animateOpacity"];
+  
   // create parent layer
 
   CALayer *parentLayer = [CALayer layer];
@@ -347,10 +372,25 @@ RCT_EXPORT_METHOD
   // create videocomposition to add textLayer on base video
   AVMutableVideoComposition *textLayerComposition = [AVMutableVideoComposition videoComposition];
   textLayerComposition.renderSize = size;
-  textLayerComposition.frameDuration = CMTimeMake(1, 30);
+  textLayerComposition.frameDuration = CMTimeMake(3, 30);
   textLayerComposition.animationTool = [AVVideoCompositionCoreAnimationTool videoCompositionCoreAnimationToolWithPostProcessingAsVideoLayer:videoLayer inLayer:parentLayer];
   textLayerComposition.instructions = [NSArray arrayWithObject:mainInstruction];
 
+  // Audioの合成パラメータオブジェクトを生成
+  AVMutableAudioMixInputParameters *audioMixInputParameters;
+  audioMixInputParameters = [AVMutableAudioMixInputParameters audioMixInputParametersWithTrack:mutableCompositionAudioTrack];
+  [audioMixInputParameters setVolumeRampFromStartVolume:1.0
+                                            toEndVolume:1.0
+                                              timeRange:CMTimeRangeMake(kCMTimeZero, mixComposition.duration)];
+  
+  /////////////////////////////////////////////////////////////////////////////
+  // 手順8
+  
+  // AVMutableAudioMixを生成
+  AVMutableAudioMix *mutableAudioMix = [AVMutableAudioMix audioMix];
+  mutableAudioMix.inputParameters = @[audioMixInputParameters];
+
+  
 
   // static date formatter
   static NSDateFormatter *kDateFormatter;
@@ -362,7 +402,8 @@ RCT_EXPORT_METHOD
   AVAssetExportSession *exporter = [[AVAssetExportSession alloc] initWithAsset:mixComposition presetName:AVAssetExportPresetHighestQuality];
 
   exporter.videoComposition = textLayerComposition;
-
+  exporter.audioMix = mutableAudioMix;
+  
   exporter.outputURL = [[[[NSFileManager defaultManager] URLForDirectory:NSDocumentDirectory inDomain:NSUserDomainMask appropriateForURL:nil create:@YES error:nil] URLByAppendingPathComponent:[kDateFormatter stringFromDate:[NSDate date]]] URLByAppendingPathExtension:CFBridgingRelease(UTTypeCopyPreferredTagWithClass((CFStringRef)AVFileTypeMPEG4, kUTTagClassFilenameExtension))];
 
   exporter.outputFileType = AVFileTypeMPEG4;
