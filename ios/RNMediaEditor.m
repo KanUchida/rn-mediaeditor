@@ -376,7 +376,7 @@ RCT_EXPORT_METHOD
   // create videocomposition to add textLayer on base video
   AVMutableVideoComposition *textLayerComposition = [AVMutableVideoComposition videoComposition];
   textLayerComposition.renderSize = size;
-  textLayerComposition.frameDuration = CMTimeMake(3, 30);
+  textLayerComposition.frameDuration = CMTimeMake(1, 30);
   textLayerComposition.animationTool = [AVVideoCompositionCoreAnimationTool videoCompositionCoreAnimationToolWithPostProcessingAsVideoLayer:videoLayer inLayer:parentLayer];
   textLayerComposition.instructions = [NSArray arrayWithObject:mainInstruction];
 

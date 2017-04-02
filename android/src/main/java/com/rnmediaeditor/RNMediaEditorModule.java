@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
@@ -14,18 +15,21 @@ import android.support.annotation.StringDef;
 import android.util.Log;
 import android.util.Base64;
 
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.WritableMap;
 import com.github.hiteshsondhi88.libffmpeg.ExecuteBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -67,109 +71,129 @@ public class RNMediaEditorModule extends ReactContextBaseJavaModule {
   }
 
   private void embedTextOnImage(final ReadableMap options, final Promise promise) {
-    String path = options.getString("path");
+    // decode input base64 string to bitmap
+    String rawData = options.getString("data");
+    byte[] decodedBytes = Base64.decode(rawData, Base64.DEFAULT);
 
-    File img = new File(path);
+    Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
 
-    if (img.exists()) {
-      ReadableMap firstText = options.getMap("firstText");
-      // create base bitmap of input file
-      Bitmap bitmap = BitmapFactory.decodeFile(path);
-      Bitmap.Config bitmapConfig = bitmap.getConfig();
-
-      Log.d("example", "bytes:" + Integer.toString(bitmap.getByteCount()));
-      // set default config if config is none
-      if (bitmapConfig == null) {
-        bitmapConfig = Bitmap.Config.ARGB_8888;
-      }
-
-      bitmap = bitmap.copy(bitmapConfig, true);
-      Canvas canvas = new Canvas(bitmap);
-
-
-      String backgroundColor = firstText.getString("backgroundColor");
-      float backgroundOpacity = (float) (firstText.getDouble("backgroundOpacity"));
-
-      // draw text container container
-      Paint containerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-      containerPaint.setColor(Color.parseColor(backgroundColor));
-      containerPaint.setStyle(Paint.Style.FILL);
-      int opacity = (int) (255 * backgroundOpacity);
-      containerPaint.setAlpha(opacity);
-
-      String fontColor = firstText.getString("textColor");
-      int fontSize = firstText.getInt("fontSize");
-      String text = firstText.getString("text");
-
-      // draw text Paint
-      Paint textPaint = new Paint();
-      textPaint.setColor(Color.parseColor(fontColor));
-
-      // convert pixel to sp
-//      float scaledDensity = _reactContext.getResources().getDisplayMetrics().scaledDensity;
-//      textPaint.setTextSize(fontSize/scaledDensity);
-      textPaint.setTextSize(fontSize);
-      float textSize = textPaint.getTextSize();
-      float containerWidth = textPaint.measureText(text) + textSize * 2;
-
-      int top = firstText.getInt("top");
-      int left = firstText.getInt("left");
-      // draw paint in canvas
-      canvas.drawRect(left, top, left + containerWidth, top + textSize * 2, containerPaint); // left, top, right, bottom
-      canvas.drawText(text, left + textSize, top + textSize * 4 / 3, textPaint);
-
-
-      ReadableMap secondText = options.getMap("secondText");
-      String backgroundColor2 = secondText.getString("backgroundColor");
-      float backgroundOpacity2 = (float) (secondText.getDouble("backgroundOpacity"));
-
-      // draw text container container
-      Paint containerPaint2 = new Paint(Paint.ANTI_ALIAS_FLAG);
-      containerPaint2.setColor(Color.parseColor(backgroundColor2));
-      containerPaint2.setStyle(Paint.Style.FILL);
-      int opacity2 = (int) (255 * backgroundOpacity2);
-      containerPaint2.setAlpha(opacity2);
-
-      String fontColor2 = secondText.getString("textColor");
-      int fontSize2 = secondText.getInt("fontSize");
-      String text2 = secondText.getString("text");
-
-      // draw text Paint
-      Paint textPaint2 = new Paint();
-      textPaint2.setColor(Color.parseColor(fontColor2));
-
-      // convert pixel to sp
-//      float scaledDensity = _reactContext.getResources().getDisplayMetrics().scaledDensity;
-//      textPaint.setTextSize(fontSize/scaledDensity);
-      textPaint2.setTextSize(fontSize2);
-      float textSize2 = textPaint2.getTextSize();
-      float containerWidth2 = textPaint2.measureText(text2) + textSize2 * 2;
-
-      int top2 = secondText.getInt("top");
-      int left2 = secondText.getInt("left");
-      // draw paint in canvas
-      canvas.drawRect(left2, top2, left2 + containerWidth2, top2 + textSize2 * 2, containerPaint2); // left, top, right, bottom
-      canvas.drawText(text2, left2 + textSize2, top2 + textSize2 * 4 / 3, textPaint2);
-
-
-      int bytes = bitmap.getByteCount();
-      ByteBuffer buffer = ByteBuffer.allocate(bytes);
-      bitmap.copyPixelsToBuffer(buffer);
-
-      // Save into Camera Roll
-      String uri = MediaStore.Images.Media.insertImage(_reactContext.getContentResolver(), bitmap, "", "");
-
-      byte[] data = buffer.array();
-      String dataString = new String(data);
-
-      File out = getOutputFile(TYPE_IMAGE);
-
-      writeDataToFile(data, out);
-
-      promise.resolve(out.getAbsolutePath());
-    } else {
-      promise.reject("rejected", "Data file not found");
+    Bitmap.Config bitmapConfig = bitmap.getConfig();
+    // set default config if config is none
+    if (bitmapConfig == null) {
+      bitmapConfig = Bitmap.Config.ARGB_8888;
     }
+
+    bitmap = bitmap.copy(bitmapConfig, true);
+    Canvas canvas = new Canvas(bitmap);
+
+    // embed first text on bitmap
+    ReadableMap firstText = options.getMap("firstText");
+
+    String backgroundColor = firstText.getString("backgroundColor");
+    float backgroundOpacity = (float) (firstText.getDouble("backgroundOpacity"));
+
+    // draw text container container
+    Paint containerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    containerPaint.setColor(Color.parseColor(backgroundColor));
+    containerPaint.setStyle(Paint.Style.FILL);
+    int opacity = (int) (255 * backgroundOpacity);
+    containerPaint.setAlpha(opacity);
+
+    String fontColor = firstText.getString("textColor");
+    int fontSize = firstText.getInt("fontSize");
+    String text = firstText.getString("text");
+
+    // draw text Paint
+    Paint textPaint = new Paint();
+    textPaint.setColor(Color.parseColor(fontColor));
+    textPaint.setTextSize(fontSize);
+    textPaint.setTypeface(Typeface.DEFAULT_BOLD);
+    int top = firstText.getInt("top");
+    int left = firstText.getInt("left");
+
+
+    boolean isVertical = firstText.getBoolean("vertical");
+    if (isVertical) {
+      Rect textSize = new Rect();
+      textPaint.getTextBounds(text, 0, text.length(), textSize);
+
+      // draw paint in canvas
+      canvas.drawRect(left, top, left + textSize.width() + fontSize * 2, top + textSize.height() * 2, containerPaint); // left, top, right, bottom
+      canvas.drawText(text, left + fontSize, top + textSize.height() + textSize.height()/2, textPaint);
+
+    } else {
+
+    Rect textSize = new Rect();
+    textPaint.getTextBounds(text, 0, text.length(), textSize);
+
+      // draw paint in canvas
+      canvas.drawRect(left, top, left + textSize.width() + fontSize * 2, top + textSize.height() * 2, containerPaint); // left, top, right, bottom
+      canvas.drawText(text, left + fontSize, top + textSize.height() + textSize.height()/2, textPaint);
+
+    }
+
+
+
+    // embed first text on bitmap
+    ReadableMap secondText = options.getMap("secondText");
+
+    String backgroundColor2 = secondText.getString("backgroundColor");
+    float backgroundOpacity2 = (float) (secondText.getDouble("backgroundOpacity"));
+
+    // draw text container container
+    Paint containerPaint2 = new Paint(Paint.ANTI_ALIAS_FLAG);
+    containerPaint2.setColor(Color.parseColor(backgroundColor2));
+    containerPaint2.setStyle(Paint.Style.FILL);
+    int opacity2 = (int) (255 * backgroundOpacity2);
+    containerPaint2.setAlpha(opacity2);
+
+    String fontColor2 = secondText.getString("textColor");
+    int fontSize2 = secondText.getInt("fontSize");
+    String text2 = secondText.getString("text");
+
+    // draw text Paint
+    Paint textPaint2 = new Paint();
+    textPaint2.setColor(Color.parseColor(fontColor));
+    textPaint2.setTextSize(fontSize);
+    textPaint2.setTypeface(Typeface.DEFAULT_BOLD);
+    int top2 = secondText.getInt("top");
+    int left2 = secondText.getInt("left");
+
+
+    boolean isVertical2 = secondText.getBoolean("vertical");
+    if (isVertical2) {
+
+      Rect textSize = new Rect();
+      textPaint2.getTextBounds(text2, 0, text2.length(), textSize);
+
+      // draw paint in canvas
+      canvas.drawRect(left2, top2, left2 + textSize.width() + fontSize2 * 2, top2 + textSize.height() * 2, containerPaint2); // left, top, right, bottom
+      canvas.drawText(text2, left2 + fontSize2, top2 + textSize.height() + textSize.height()/2, textPaint2);
+
+    } else {
+
+      Rect textSize = new Rect();
+      textPaint2.getTextBounds(text2, 0, text2.length(), textSize);
+
+      // draw paint in canvas
+      canvas.drawRect(left2, top2, left2 + textSize.width() + fontSize2 * 2, top2 + textSize.height() * 2, containerPaint2); // left, top, right, bottom
+      canvas.drawText(text2, left2 + fontSize2, top2 + textSize.height() + textSize.height()/2, textPaint2);
+    }
+
+
+    // output
+    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+    bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+    byte[] byteArray = byteArrayOutputStream.toByteArray();
+
+    String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
+
+
+    WritableMap map = Arguments.createMap();
+
+    map.putString("data", encoded);
+    map.putString("message", "success");
+    promise.resolve(map);
   }
 
 
