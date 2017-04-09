@@ -14,6 +14,10 @@ import android.support.annotation.RequiresPermission;
 import android.support.annotation.StringDef;
 import android.util.Log;
 import android.util.Base64;
+import android.text.Layout;
+import android.text.StaticLayout;
+import android.text.TextPaint;
+import android.text.Layout.Alignment;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -105,7 +109,7 @@ public class RNMediaEditorModule extends ReactContextBaseJavaModule {
     String text = firstText.getString("text");
 
     // draw text Paint
-    Paint textPaint = new Paint();
+    TextPaint textPaint = new TextPaint();
     textPaint.setColor(Color.parseColor(fontColor));
     textPaint.setTextSize(fontSize);
     textPaint.setTypeface(Typeface.DEFAULT_BOLD);
@@ -118,9 +122,16 @@ public class RNMediaEditorModule extends ReactContextBaseJavaModule {
       Rect textSize = new Rect();
       textPaint.getTextBounds(text, 0, text.length(), textSize);
 
+      canvas.drawRect(left, top, left + textSize.width(), top + textSize.height() * text.length(), containerPaint); // left, top, right, bottom
+
+      StaticLayout mTextLayout = new StaticLayout(text, textPaint, canvas.getWidth(), Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+      canvas.save();
+      canvas.translate(left + textSize.height()/2, top + textSize.height()/2);
+      mTextLayout.draw(canvas);
+      canvas.restore();
+
       // draw paint in canvas
-      canvas.drawRect(left, top, left + textSize.width() + fontSize * 2, top + textSize.height() * 2, containerPaint); // left, top, right, bottom
-      canvas.drawText(text, left + fontSize, top + textSize.height() + textSize.height()/2, textPaint);
+      // canvas.drawText(text, left + fontSize, top + textSize.height() + textSize.height()/2, textPaint);
 
     } else {
 
@@ -153,7 +164,7 @@ public class RNMediaEditorModule extends ReactContextBaseJavaModule {
     String text2 = secondText.getString("text");
 
     // draw text Paint
-    Paint textPaint2 = new Paint();
+    TextPaint textPaint2 = new TextPaint();
     textPaint2.setColor(Color.parseColor(fontColor));
     textPaint2.setTextSize(fontSize);
     textPaint2.setTypeface(Typeface.DEFAULT_BOLD);
@@ -163,14 +174,16 @@ public class RNMediaEditorModule extends ReactContextBaseJavaModule {
 
     boolean isVertical2 = secondText.getBoolean("vertical");
     if (isVertical2) {
-
       Rect textSize = new Rect();
       textPaint2.getTextBounds(text2, 0, text2.length(), textSize);
 
-      // draw paint in canvas
-      canvas.drawRect(left2, top2, left2 + textSize.width() + fontSize2 * 2, top2 + textSize.height() * 2, containerPaint2); // left, top, right, bottom
-      canvas.drawText(text2, left2 + fontSize2, top2 + textSize.height() + textSize.height()/2, textPaint2);
+      canvas.drawRect(left2, top2, left2 + textSize.width(), top2+ textSize.height() * text2.length(), containerPaint2); // left, top, right, bottom
 
+      StaticLayout mTextLayout = new StaticLayout(text2, textPaint2, canvas.getWidth(), Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+      canvas.save();
+      canvas.translate(left2 + textSize.height()/2, top2 + textSize.height()/2);
+      mTextLayout.draw(canvas);
+      canvas.restore();
     } else {
 
       Rect textSize = new Rect();
