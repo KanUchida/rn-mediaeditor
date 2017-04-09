@@ -48,6 +48,7 @@ public class RNMediaEditorModule extends ReactContextBaseJavaModule {
   public static final int TYPE_VIDEO = 2;
 
   public static Promise _promise;
+  public WritableMap _result;
 
   public RNMediaEditorModule(ReactApplicationContext reactContext) {
     super(reactContext);
@@ -270,32 +271,42 @@ public class RNMediaEditorModule extends ReactContextBaseJavaModule {
     }
 
     String path = options.getString("path");
+    double duration = options.getDouble("duration");
+
     ReadableMap firstText = options.getMap("firstText");
     String text = firstText.getString("text");
     String fontColor = firstText.getString("textColor");
     String backgroundColor = firstText.getString("backgroundColor");
-    int fontSize = firstText.getInt("fontSize");
+    int fontSize = (int)firstText.getDouble("fontSize");
     float backgroundOpaciy = (float)firstText.getDouble("backgroundOpacity");
+    int top = (int)firstText.getDouble("top");
+    int left = (int)firstText.getDouble("left");
+    boolean isVertical = firstText.getBoolean("vertical");
 
     ReadableMap secondText = options.getMap("secondText");
     String text2 = secondText.getString("text");
     String fontColor2 = secondText.getString("textColor");
     String backgroundColor2 = secondText.getString("backgroundColor");
-    int fontSize2 = secondText.getInt("fontSize");
+    int fontSize2 = (int)secondText.getDouble("fontSize");
     float backgroundOpaciy2 = (float)secondText.getDouble("backgroundOpacity");
+    int top2 = (int)secondText.getDouble("top");
+    int left2 = (int)secondText.getDouble("left");
 
     File out = getOutputFile(TYPE_VIDEO);
 
     String[] cmd = new String[] {
             "-i", path, "-c:v", "libx264", "-preset", "ultrafast", "-filter_complex",
-            "drawtext=fontfile=/system/fonts/Roboto-Regular.ttf:text=" +
-            text + ":x=(w-text_w)/2:y=(h-text_h-line_h)/2" +":fontcolor=" + fontColor + ":fontsize=" + fontSize +
-            ":box=1:boxcolor="+backgroundColor+"@"+backgroundOpaciy+":boxborderw="+(fontSize/2) + "," +
-            "drawtext=fontfile=/system/fonts/Roboto-Regular.ttf:text=" +
-            text2 + ":x=(w-text_w)/2:y=(h-text_h-line_h)/4" +":fontcolor=" + fontColor2 + ":fontsize=" + fontSize2 +
-            ":box=1:boxcolor="+backgroundColor2+"@"+backgroundOpaciy2+":boxborderw="+(fontSize2/2),
+            "drawtext=fontfile=/system/fonts/NotoSansCJK-Regular.ttc:text=" +
+            text + ":x=" + left + ":y=" + top + ":fontcolor=" + fontColor + ":fontsize=" + fontSize +
+            ":box=1:boxcolor="+backgroundColor+"@"+backgroundOpaciy+":boxborderw="+(fontSize/2) + ":enable='between(t," + (duration-3) + "," + duration + ")'," +
+            "drawtext=fontfile=/system/fonts/NotoSansCJK-Regular.ttc:text=" +
+            text2 + ":x=" + left2 + ":y=" + top2 + ":fontcolor=" + fontColor2 + ":fontsize=" + fontSize2 +
+            ":box=1:boxcolor="+backgroundColor2+"@"+backgroundOpaciy2+":boxborderw="+(fontSize2/2)+  ":enable='between(t," + (duration-3) + "," + duration + ")'",
             out.getAbsolutePath()
     };
+
+    _result = Arguments.createMap();
+    _result.putString("path", out.getAbsolutePath());
 
     try {
       // to execute "ffmpeg -version" command you just need to pass "-version"
@@ -318,8 +329,8 @@ public class RNMediaEditorModule extends ReactContextBaseJavaModule {
 
         @Override
         public void onSuccess(String message) {
-          Log.d("example", "Successfully output file with message:\n\t");
-          RNMediaEditorModule._promise.resolve("saved video output");
+          _result.putString("message", "success");
+          RNMediaEditorModule._promise.resolve(_result);
         }
 
         @Override
