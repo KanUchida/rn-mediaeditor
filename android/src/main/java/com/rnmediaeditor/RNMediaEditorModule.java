@@ -112,7 +112,7 @@ public class RNMediaEditorModule extends ReactContextBaseJavaModule {
     TextPaint textPaint = new TextPaint();
     textPaint.setColor(Color.parseColor(fontColor));
     textPaint.setTextSize(fontSize);
-    textPaint.setTypeface(Typeface.DEFAULT_BOLD);
+    textPaint.setTypeface("GenEiGothicM-R");
     int top = firstText.getInt("top");
     int left = firstText.getInt("left");
 
@@ -167,7 +167,7 @@ public class RNMediaEditorModule extends ReactContextBaseJavaModule {
     TextPaint textPaint2 = new TextPaint();
     textPaint2.setColor(Color.parseColor(fontColor));
     textPaint2.setTextSize(fontSize);
-    textPaint2.setTypeface(Typeface.DEFAULT_BOLD);
+    textPaint2.setTypeface("GenEiGothicM-R");
     int top2 = secondText.getInt("top");
     int left2 = secondText.getInt("left");
 

@@ -275,10 +275,10 @@ RCT_EXPORT_METHOD
   NSString *text1 = [firstText objectForKey:@"text"];
 
   // create font and size of font
-  [subtitle1Text setFont:@"Helvetica-Bold"];
+  [subtitle1Text setFont:@"GenEiGothicM-R"];
   NSNumber *fontSizeNumber1 = [firstText objectForKey:@"fontSize"];
   NSInteger fontSize1 = abs(fontSizeNumber1.integerValue * 0.9);
-  UIFont *font1 = [UIFont fontWithName:@"Helvetica-Bold" size:fontSize1];
+  UIFont *font1 = [UIFont fontWithName:@"GenEiGothicM-R" size:fontSize1];
   CGSize textSize1 = [text1 sizeWithFont:font1];
   NSNumber *topN1 = [firstText objectForKey:@"top"];
   NSNumber *leftN1 = [firstText objectForKey:@"left"];
@@ -315,10 +315,10 @@ RCT_EXPORT_METHOD
   NSString *text2 = [secondText objectForKey:@"text"];
 
   // create font and size of font
-  [subtitle2Text setFont:@"Helvetica-Bold"];
+  [subtitle2Text setFont:@"GenEiGothicM-R"];
   NSNumber *fontSizeNumber2 = [secondText objectForKey:@"fontSize"];
   NSInteger fontSize2 = abs(fontSizeNumber2.integerValue * 0.9);
-  UIFont *font2 = [UIFont fontWithName:@"Helvetica-Bold" size:fontSize2];
+  UIFont *font2 = [UIFont fontWithName:@"GenEiGothicM-R" size:fontSize2];
   CGSize textSize2 = [text2 sizeWithFont:font2];
   NSNumber *topN2 = [secondText objectForKey:@"top"];
   NSNumber *leftN2 = [secondText objectForKey:@"left"];
