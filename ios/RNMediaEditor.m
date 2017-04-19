@@ -104,6 +104,9 @@ RCT_EXPORT_METHOD
 
   NSNumber *fontSizeNumber = [firstText objectForKey:@"fontSize"];
   NSInteger fontSize = abs(fontSizeNumber.intValue);
+  
+  NSNumber *lineNumber1 = [firstText objectForKey:@"lineNum"];
+  NSInteger lineNum1 = abs(lineNumber1.intValue);
 
   UIColor *textColor =
     [self colorFromHexString:[firstText objectForKey:@"textColor"] Alpha:1.0];
@@ -144,21 +147,20 @@ RCT_EXPORT_METHOD
   CGRect textRect;
   if ([isFirstTextVertical integerValue] == 1) {
     NSLog(@"Vertical string");
-    textContainer = CGRectMake(point.x, point.y, size.height * 2, size.height * (text.length + 1) / 2);
+    textContainer = CGRectMake(point.x, point.y, size.height * lineNum1, size.height * (text.length + 1) / 2);
     CGContextFillRect(
       UIGraphicsGetCurrentContext(),
       textContainer
     );
-    textRect = CGRectMake(point.x + fontSize/2, point.y + size.height / 4, size.height, size.height * text.length);
+    textRect = CGRectMake(point.x + fontSize/(lineNum1 + 1), point.y + size.height / 4, size.height * lineNum1, size.height * text.length);
   } else {
-    textContainer = CGRectMake(point.x, point.y, size.width + fontSize * 1, size.height * 1.5);
+    textContainer = CGRectMake(point.x, point.y, size.width + fontSize * 1, size.height * lineNum1 * 1.5);
     CGContextFillRect(
       UIGraphicsGetCurrentContext(),
       textContainer
     );
-    textRect = CGRectMake(point.x + fontSize/2, point.y + textContainer.size.height / 4, size.width, size.height);
+    textRect = CGRectMake(point.x + fontSize/(lineNum1 + 1), point.y + textContainer.size.height / 4, size.width, size.height * lineNum1);
   }
-
 
   [textColor set];
   [text drawInRect:textRect
@@ -175,6 +177,9 @@ RCT_EXPORT_METHOD
   // again to second text
   NSNumber *fontSizeNumber2 = [secondText objectForKey:@"fontSize"];
   NSInteger fontSize2 = abs(fontSizeNumber2.intValue);
+
+  NSNumber *lineNumber2 = [secondText objectForKey:@"lineNum"];
+  NSInteger lineNum2 = abs(lineNumber2.intValue);
 
   UIColor *textColor2 =
   [self colorFromHexString:[secondText objectForKey:@"textColor"] Alpha:1.0];
@@ -208,14 +213,14 @@ RCT_EXPORT_METHOD
   [backgroundColor2 set];
 
 
-  CGRect textContainer2 = CGRectMake(point2.x, point2.y, size2.width + fontSize2*1, size2.height * 1.5);
+  CGRect textContainer2 = CGRectMake(point2.x, point2.y, size2.width + fontSize2*1, size2.height * 1.5 + (fontSize2-1) * lineNum2);
 
   CGContextFillRect(
                     UIGraphicsGetCurrentContext(),
                     textContainer2
                     );
 
-  CGRect textRect2 = CGRectMake(point2.x + fontSize2/2, point2.y + textContainer2.size.height / 4, size2.width, size2.height);
+  CGRect textRect2 = CGRectMake(point2.x + fontSize2/2, point2.y + textContainer2.size.height / 4, size2.width, size2.height * lineNum2);
 
   [textColor2 set];
   [text2 drawInRect:textRect2
@@ -282,15 +287,18 @@ RCT_EXPORT_METHOD
   CGSize textSize1 = [text1 sizeWithFont:font1];
   NSNumber *topN1 = [firstText objectForKey:@"top"];
   NSNumber *leftN1 = [firstText objectForKey:@"left"];
+  NSNumber *lineNumber1 = [firstText objectForKey:@"lineNum"];
+  NSInteger lineNum1 = abs(lineNumber1.intValue);
+
   [subtitle1Text setFontSize:font1.pointSize];
   
 
   NSNumber *isFirstTextVertical = [firstText objectForKey:@"vertical"];
   
   if ([isFirstTextVertical integerValue] == 1) {
-    [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, topN1.integerValue, size.width, size.height)];
+    [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, topN1.integerValue, size.width * lineNum1, size.height)];
   } else {
-    [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, topN1.integerValue, size.width, textSize1.height * 1.2)];
+    [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, topN1.integerValue, size.width, textSize1.height * 1.2 * lineNum1)];
   }
   [subtitle1Text setString:text1];
   [subtitle1Text setAlignmentMode:kCAAlignmentLeft];
@@ -318,14 +326,24 @@ RCT_EXPORT_METHOD
   [subtitle2Text setFont:@"GenEiGothicM-R"];
   NSNumber *fontSizeNumber2 = [secondText objectForKey:@"fontSize"];
   NSInteger fontSize2 = abs(fontSizeNumber2.integerValue * 0.9);
+  NSNumber *isSecondTextVertical = [secondText objectForKey:@"vertical"];
   UIFont *font2 = [UIFont fontWithName:@"GenEiGothicM-R" size:fontSize2];
   CGSize textSize2 = [text2 sizeWithFont:font2];
   NSNumber *topN2 = [secondText objectForKey:@"top"];
   NSNumber *leftN2 = [secondText objectForKey:@"left"];
+  NSNumber *lineNumber2 = [firstText objectForKey:@"lineNum"];
+  NSInteger lineNum2 = abs(lineNumber2.intValue);
+
+
   [subtitle2Text setFontSize:font2.pointSize];
 
   // TODO 文字の場所をコントロールする
-  [subtitle2Text setFrame:CGRectMake(leftN2.integerValue, topN2.integerValue, size.width, size.height)];
+  if ([isSecondTextVertical integerValue] == 1) {
+    [subtitle2Text setFrame:CGRectMake(leftN2.integerValue, topN2.integerValue, size.width * lineNum2, size.height)];
+  } else {
+    [subtitle2Text setFrame:CGRectMake(leftN2.integerValue, topN2.integerValue, size.width, textSize2.height * 1.2 * lineNum2)];
+  }
+
   [subtitle2Text setString:text2];
   [subtitle2Text setAlignmentMode:kCAAlignmentLeft];
 
