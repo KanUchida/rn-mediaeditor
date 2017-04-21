@@ -336,7 +336,7 @@ RCT_EXPORT_METHOD
   [subtitle1Text setFont:@"GenEiGothicM-R"];
   // fontSizeを指定
   NSNumber *fontSizeNumber1 = [firstText objectForKey:@"fontSize"];
-  NSInteger fontSize1 = abs(fontSizeNumber1.integerValue * 0.9);
+  NSInteger fontSize1 = abs(fontSizeNumber1.integerValue * 0.5);
 
   // fontの指定
   UIFont *font1 = [UIFont fontWithName:@"GenEiGothicM-R" size:fontSize1];
@@ -358,10 +358,12 @@ RCT_EXPORT_METHOD
   NSNumber *isFirstTextVertical = [firstText objectForKey:@"vertical"];
   if ([isFirstTextVertical integerValue] == 1) {
     // [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, size.height - topN1.integerValue, textSize1.height * lineNum1, textSize1.width)];
-    [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, topN1.integerValue, textSize1.height, textSize1.width)];
+    // [subtitle1Text setFrame:CGRectMake(leftN1.integerValue,  topN1.integerValue, textSize1.height * lineNum1, textSize1.width)];
+    [subtitle1Text setFrame:CGRectMake(0, 0, textSize1.height * lineNum1, textSize1.width)];
   } else {
     // [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, size.height - topN1.integerValue, textSize1.width, textSize1.height * lineNum1)];
-    [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, topN1.integerValue, textSize1.width, textSize1.height)];
+    // [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, topN1.integerValue, textSize1.width, textSize1.height * lineNum1)];
+    [subtitle1Text setFrame:CGRectMake(0, 0, textSize1.width, textSize1.height * lineNum1)];
   }
 
   // 実際のテキストの割り当て -> align left -> contents 中央
@@ -407,16 +409,18 @@ RCT_EXPORT_METHOD
   NSNumber *lineNumber2 = [secondText objectForKey:@"lineNum"];
   NSInteger lineNum2 = abs(lineNumber2.intValue);
 
-  [subtitle2Text setFontSize:font2.pointSize];
+  [subtitle2Text setFontSize:(font2.pointSize / 2)];
 
   // TODO 文字の場所をコントロールする
   // lineNumを考慮した値をtextSizeが返してくれるか確認
   if ([isSecondTextVertical integerValue] == 1) {
     // [subtitle2Text setFrame:CGRectMake(leftN2.integerValue, size.height - topN2.integerValue, textSize2.height, textSize2.width * lineNum2)];
-    [subtitle2Text setFrame:CGRectMake(leftN2.integerValue, topN2.integerValue, textSize2.height, textSize2.width)];
+    [subtitle2Text setFrame:CGRectMake(0, 0, textSize2.height, textSize2.width * lineNum2)];
+    // [subtitle2Text setFrame:CGRectMake(leftN2.integerValue, topN2.integerValue, textSize2.height, textSize2.width)];
   } else {
     // [subtitle2Text setFrame:CGRectMake(leftN2.integerValue, size.height - topN2.integerValue, textSize2.width * lineNum2, textSize2.height)];
-    [subtitle2Text setFrame:CGRectMake(leftN2.integerValue, topN2.integerValue, textSize2.width, textSize2.height)];
+    [subtitle2Text setFrame:CGRectMake(0, 0, textSize2.height, textSize2.width * lineNum2)];
+    // [subtitle2Text setFrame:CGRectMake(leftN2.integerValue, topN2.integerValue, textSize2.width, textSize2.height)];
   }
 
   [subtitle2Text setString:text2];  // 文字の埋め込み
