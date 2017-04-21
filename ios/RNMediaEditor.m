@@ -357,9 +357,11 @@ RCT_EXPORT_METHOD
   // 文字入力エリアの用意
   NSNumber *isFirstTextVertical = [firstText objectForKey:@"vertical"];
   if ([isFirstTextVertical integerValue] == 1) {
-    [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, topN1.integerValue, size.height * lineNum1, size.height)];
+    // [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, topN1.integerValue, textSize1.height * lineNum1, textSize1.width)];
+    [subtitle1Text setFrame:CGRectMake(0, 0, textSize1.height * lineNum1, textSize1.width)];
   } else {
-    [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, topN1.integerValue, size.width, textSize1.height * 1.2 * lineNum1)];
+    // [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, topN1.integerValue, textSize1.width, textSize1.height * lineNum1)];
+    [subtitle1Text setFrame:CGRectMake(0, 0, textSize1.width, textSize1.height * lineNum1)];
   }
 
   // 実際のテキストの割り当て -> align left -> contents 中央
@@ -378,26 +380,30 @@ RCT_EXPORT_METHOD
 
   // 背景色の指定
   UIColor *backgroundColor1 = [self colorFromHexString:[firstText objectForKey:@"backgroundColor"] Alpha:alpha1];
-  //  [subtitle1Text setBackgroundColor:[backgroundColor1 CGColor]];
+  [subtitle1Text setBackgroundColor:[backgroundColor1 CGColor]];
 
 
   ///////////////////////////////////////////////////////////////
   // create text2
   // same things to do
   CATextLayer *subtitle2Text = [[CATextLayer alloc] init];
-  subtitle2Text.contentsScale = [[UIScreen mainScreen] scale];
+  subtitle2Text.contentsScale = [[UIScreen mainScreen] scale];;
 
+  // frame作らなくていいの？
+  
+  UIColor *color = [UIColor whiteColor];
   NSString *text2 = [secondText objectForKey:@"text"];
 
   // create font and size of font
   [subtitle2Text setFont:@"GenEiGothicM-R"];
   NSNumber *fontSizeNumber2 = [secondText objectForKey:@"fontSize"];
-  NSInteger fontSize2 = abs(fontSizeNumber2.integerValue * 0.9);
+  NSInteger fontSize2 = abs(fontSizeNumber2.integerValue * 0.5);
   NSNumber *isSecondTextVertical = [secondText objectForKey:@"vertical"];
   UIFont *font2 = [UIFont fontWithName:@"GenEiGothicM-R" size:fontSize2];
   CGSize textSize2 = [text2 sizeWithFont:font2];
   NSNumber *topN2 = [secondText objectForKey:@"top"];
   NSNumber *leftN2 = [secondText objectForKey:@"left"];
+
   NSNumber *lineNumber2 = [secondText objectForKey:@"lineNum"];
   NSInteger lineNum2 = abs(lineNumber2.intValue);
 
@@ -405,12 +411,12 @@ RCT_EXPORT_METHOD
 
   // TODO 文字の場所をコントロールする
   if ([isSecondTextVertical integerValue] == 1) {
-    [subtitle2Text setFrame:CGRectMake(leftN2.integerValue, topN2.integerValue, size.height * lineNum2, size.width)];
+    [subtitle2Text setFrame:CGRectMake(leftN2.integerValue, size.height - topN2.integerValue, textSize2.height, textSize2.width)];
   } else {
-    [subtitle2Text setFrame:CGRectMake(leftN2.integerValue, topN2.integerValue, size.height, textSize2.height * 1.2 * lineNum2)];
+    [subtitle2Text setFrame:CGRectMake(leftN2.integerValue, size.height - topN2.integerValue, textSize2.width, textSize2.height)];
   }
 
-  [subtitle2Text setString:text2];  // 文字の入力
+  [subtitle2Text setString:text2];  // 文字の埋め込み
   [subtitle2Text setAlignmentMode:kCAAlignmentLeft]; // 文字のalignの位置を決めているだけ
 
   // 文字色の指定
@@ -424,7 +430,7 @@ RCT_EXPORT_METHOD
 
   // 背景色の指定
   UIColor *backgroundColor2 = [self colorFromHexString:[secondText objectForKey:@"backgroundColor"] Alpha:alpha2];
-  //  [subtitle2Text setBackgroundColor:[backgroundColor2 CGColor]];
+  [subtitle2Text setBackgroundColor:[backgroundColor2 CGColor]];
 
   // end create text2
   /////////////////////////////////////////////
@@ -443,7 +449,7 @@ RCT_EXPORT_METHOD
   [overlayLayer setMasksToBounds:YES];
   [overlayLayer setOpacity:0.0];
   [overlayLayer displayIfNeeded];
-  [overlayLayer setGeometryFlipped:YES];
+  // [overlayLayer setGeometryFlipped:YES];
   
 
   ////////////////////////////////////////////////////
@@ -464,6 +470,7 @@ RCT_EXPORT_METHOD
 
   /////////////////////////////////////////////////////
   // create parent layer
+  // この２つのlayerなくても何にも問題ないはず
 
   CALayer *parentLayer = [CALayer layer];
   CALayer *videoLayer = [CALayer layer];
@@ -476,7 +483,25 @@ RCT_EXPORT_METHOD
   parentLayer.frame = CGRectMake(0, 0, size.width, size.height);
   videoLayer.frame = CGRectMake(0, 0, size.width, size.height);
 
+
+/*
+  // 下二つは表示されないから、videoLayerは動画の合成の際には使われてない layer??
+
+  // おれんじ！
+  UIColor *parentLayerColor = [self colorFromHexString:@"#f98829" Alpha:alpha2];
+  [parentLayer setBackgroundColor:[parentLayerColor CGColor]];
+
+  // 青っぽい色
+  UIColor *videoLayerColor = [self colorFromHexString:@"#1c1321" Alpha:alpha2];
+  [videoLayer setBackgroundColor:[videoLayerColor CGColor]];
+*/
+
+  // red
+  UIColor *overlayLayerColor = [self colorFromHexString:@"#ca2e39" Alpha:alpha2];
+  [overlayLayer setBackgroundColor:[overlayLayerColor CGColor]];
+
   // 要素をparentLayerにまとめにいく
+  // ひょっとしたら使われていないけど
   [parentLayer addSublayer:videoLayer];
   [parentLayer addSublayer:overlayLayer];
 
