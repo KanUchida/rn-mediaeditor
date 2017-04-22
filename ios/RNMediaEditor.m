@@ -357,17 +357,17 @@ RCT_EXPORT_METHOD
   // 文字入力エリアの用意
   NSNumber *isFirstTextVertical = [firstText objectForKey:@"vertical"];
   if ([isFirstTextVertical integerValue] == 1) {
-    // [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, size.height - topN1.integerValue, textSize1.height * lineNum1, textSize1.width)];
-    [subtitle1Text setFrame:CGRectMake(leftN1.integerValue,  topN1.integerValue, textSize1.height * lineNum1, textSize1.width)];
+    [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, size.height - topN1.integerValue, textSize1.height * lineNum1, textSize1.width)];
+    // [subtitle1Text setFrame:CGRectMake(leftN1.integerValue,  topN1.integerValue, textSize1.height * lineNum1, textSize1.width)];
   } else {
-    // [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, size.height - topN1.integerValue, textSize1.width, textSize1.height * lineNum1)];
-    [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, topN1.integerValue, textSize1.width, textSize1.height * lineNum1)];
+    [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, size.height - topN1.integerValue, textSize1.width, textSize1.height * lineNum1)];
+    // [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, topN1.integerValue, textSize1.width, textSize1.height * lineNum1)];
   }
 
   // 実際のテキストの割り当て -> align left -> contents 中央
   [subtitle1Text setString:text1];
   [subtitle1Text setAlignmentMode:kCAAlignmentLeft];
-  [subtitle1Text setContentsGravity:kCAGravityCenter];
+  // [subtitle1Text setContentsGravity:kCAGravityCenter];
 
   // 文字色指定
   UIColor *textColor1 =
@@ -412,11 +412,11 @@ RCT_EXPORT_METHOD
   // TODO 文字の場所をコントロールする
   // lineNumを考慮した値をtextSizeが返してくれるか確認
   if ([isSecondTextVertical integerValue] == 1) {
-    // [subtitle2Text setFrame:CGRectMake(leftN2.integerValue, size.height - topN2.integerValue, textSize2.height, textSize2.width * lineNum2)];
-    [subtitle2Text setFrame:CGRectMake(leftN2.integerValue, topN2.integerValue, textSize2.height, textSize2.width)];
+    [subtitle2Text setFrame:CGRectMake(leftN2.integerValue, size.height - topN2.integerValue, textSize2.height, textSize2.width * lineNum2)];
+    // [subtitle2Text setFrame:CGRectMake(leftN2.integerValue, topN2.integerValue, textSize2.height, textSize2.width)];
   } else {
-    // [subtitle2Text setFrame:CGRectMake(leftN2.integerValue, size.height - topN2.integerValue, textSize2.width * lineNum2, textSize2.height)];
-    [subtitle2Text setFrame:CGRectMake(leftN2.integerValue, topN2.integerValue, textSize2.width, textSize2.height)];
+    [subtitle2Text setFrame:CGRectMake(leftN2.integerValue, size.height - topN2.integerValue, textSize2.width * lineNum2, textSize2.height)];
+    // [subtitle2Text setFrame:CGRectMake(leftN2.integerValue, topN2.integerValue, textSize2.width, textSize2.height)];
   }
 
   [subtitle2Text setString:text2];  // 文字の埋め込み
@@ -535,6 +535,28 @@ RCT_EXPORT_METHOD
   kDateFormatter = [[NSDateFormatter alloc] init];
   [kDateFormatter setDateFormat:@"yyyyMMddHHmmss"];
 
+  // check positon
+
+  NSLog(@"Log test - parentLayer.frame : %@", NSStringFromCGRect(self.parentLayer.frame));
+  NSLog(@"Log test - parentLayer.bounds: %@", NSStringFromCGRect(self.parentLayer.bounds));
+
+  //cview2のframeとboundsを出力
+  NSLog(@"Log test - videoLayer.frame : %@", NSStringFromCGRect(self.videoLayer.frame));
+  NSLog(@"Log test - videoLayer.bounds: %@", NSStringFromCGRect(self.videoLayer.bounds));
+
+  //cview2のframeとboundsを出力
+  NSLog(@"Log test - textLayer.frame : %@", NSStringFromCGRect(self.videoLayer.frame));
+  NSLog(@"Log test - textLayer.bounds: %@", NSStringFromCGRect(self.videoLayer.bounds));
+
+  //cview2のframeとboundsを出力
+  NSLog(@"Log test - subtitle2Text.frame : %@", NSStringFromCGRect(self.subtitle2Text.frame));
+  NSLog(@"Log test - subtitle2Text.bounds: %@", NSStringFromCGRect(self.subtitle2Text.bounds));
+
+  //cview2のframeとboundsを出力
+  NSLog(@"Log test - subtitle1Text.frame : %@", NSStringFromCGRect(self.subtitle1Text.frame));
+  NSLog(@"Log test - subtitle1Text.bounds: %@", NSStringFromCGRect(self.subtitle1Text.bounds));
+
+
 
   // export AVComposition to CameraRoll
   AVAssetExportSession *exporter = [[AVAssetExportSession alloc] initWithAsset:mixComposition presetName:AVAssetExportPresetHighestQuality];
@@ -560,5 +582,6 @@ RCT_EXPORT_METHOD
   }];
 
 }
+
 
 @end
