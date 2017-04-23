@@ -120,7 +120,10 @@ RCT_EXPORT_METHOD
   NSInteger lineNum1 = abs(lineNumber1.intValue);
 
   NSNumber *maxLengthNumber1 = [firstText objectForKey:@"maxLength"];
-  NSInteger maxLength1 = abs(maxLengthNumber1.intValue);  
+  NSInteger maxLength1 = abs(maxLengthNumber1.intValue);
+
+  NSNumber *textNumber1 = [firstText objectForKey:@"textNum"];
+  NSInteger textNum1 = abs(textNumber1.intValue);
 
   UIColor *textColor =
     [self colorFromHexString:[firstText objectForKey:@"textColor"] Alpha:1.0];
@@ -139,7 +142,7 @@ RCT_EXPORT_METHOD
   NSString *text = [firstText objectForKey:@"text"];
 
   // create font and size of font
-  UIFont *font = [UIFont boldSystemFontOfSize:fontSize];
+  UIFont *font = [UIFont boldSystemFontOfSize:fontSize lineBreakMode:NSLineBreakByTruncatingTail];
   CGSize size = [text sizeWithFont:font];
 
   // create rect of image
@@ -161,13 +164,14 @@ RCT_EXPORT_METHOD
 
   if ([isFirstTextVertical integerValue] == 1) {
     NSLog(@"Vertical string");
-    textContainer = CGRectMake(point.x - fontSize / 6, point.y - fontSize / 6, size.height * lineNum1, size.width / (lineNum1 + 1) * maxLength1 + fontSize / 6);
+    textContainer = CGRectMake(point.x - fontSize / 6, point.y - fontSize / 6, size.height * lineNum1 + fontSize / 6, fontSize * maxLength1);
     CGContextFillRect(
       UIGraphicsGetCurrentContext(),
       textContainer
     );
     // textContainerの内側に、文字エリアを作る
-    textRect = CGRectMake(point.x + fontSize / 6, point.y + fontSize / 6, size.height * lineNum1, size.width * maxLength1);
+    textRect = CGRectMake(point.x + fontSize / 6, point.y + fontSize / 6, size.height * lineNum1, fontSize * maxLength1);
+    // textRect = CGRectMake(point.x, point.y, size.height, size.width);
   } else {
     textContainer = CGRectMake(point.x - fontSize / 6, point.y - fontSize / 6, size.width * maxLength1, size.height * lineNum1);
     CGContextFillRect(
