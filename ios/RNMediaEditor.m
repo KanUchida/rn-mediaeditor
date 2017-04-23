@@ -256,6 +256,13 @@ RCT_EXPORT_METHOD
   }
 
 
+  [textColor2 set];
+  [text2 drawInRect:textRect2  // 文字入れる
+          withFont:font2  // apply font
+     lineBreakMode:UILineBreakModeClip
+         alignment:UITextAlignmentLeft ];
+
+
   UIImage *newImage2 = UIGraphicsGetImageFromCurrentImageContext();
   UIGraphicsEndImageContext();
   NSData* jpgData2 = [[NSData alloc] initWithData:UIImageJPEGRepresentation(newImage2, 1.0f)];
