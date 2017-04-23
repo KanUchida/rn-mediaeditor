@@ -326,7 +326,8 @@ RCT_EXPORT_METHOD
   UIImage *borderImage = nil;
 
   UIColor *videoBackgroundColor = [self colorFromHexString:@"#F6F5F4" Alpha:1.0];
-  borderImage = [self imageWithColor:videoBackgroundColor rectSize:CGRectMake(0, 0, size.width, size.width)];
+  // こうすると、きれいな正方形でバックグラウンドカラーがつく？
+  borderImage = [self imageWithColor:videoBackgroundColor rectSize:CGRectMake(-(size.height - size.width)/2, 0, size.width, size.width)];
 
   CALayer *backgroundLayer = [CALayer layer];
   [backgroundLayer setContents:(id)[borderImage CGImage]];
