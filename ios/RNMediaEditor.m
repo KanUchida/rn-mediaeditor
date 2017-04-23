@@ -252,7 +252,7 @@ RCT_EXPORT_METHOD
       UIGraphicsGetCurrentContext(),
       textContainer2
     );
-    textRect = CGRectMake(point2.x + fontSize2 / 6, point2.y + fontSize2 / 6, size2.height * maxLength2, size2.height * lineNum2);
+    textRect2 = CGRectMake(point2.x + fontSize2 / 6, point2.y + fontSize2 / 6, size2.height * maxLength2, size2.height * lineNum2);
   }
 
 
@@ -325,7 +325,8 @@ RCT_EXPORT_METHOD
 
   UIImage *borderImage = nil;
 
-  borderImage = [self imageWithColor:[UIColor greenColor] rectSize:CGRectMake(0, 0, size.width, size.height)];
+  UIColor *videoBackgroundColor = [self colorFromHexString:@"#F6F5F4" Alpha:1.0];
+  borderImage = [self imageWithColor:videoBackgroundColor rectSize:CGRectMake(0, 0, size.width, size.width)];
 
   CALayer *backgroundLayer = [CALayer layer];
   [backgroundLayer setContents:(id)[borderImage CGImage]];
@@ -388,9 +389,9 @@ RCT_EXPORT_METHOD
   // 文字入力エリアの用意
   NSNumber *isFirstTextVertical = [firstText objectForKey:@"vertical"];
   if ([isFirstTextVertical integerValue] == 1) {
-    [subtitle1Text setFrame:CGRectMake(topN1.integerValue, leftN1.integerValue, textSize1.height * lineNum1 + fontSize1 / 6, textSize1.width * maxLength1 + fontSize1 / 3)];
+    [subtitle1Text setFrame:CGRectMake(topN1.integerValue, leftN1.integerValue, textSize1.height, textSize1.width)];
   } else {
-    [subtitle1Text setFrame:CGRectMake(topN1.integerValue, leftN1.integerValue, textSize1.width * maxLength1 + fontSize1 / 3, textSize1.height * lineNum1 + fontSize1 / 6)];
+    [subtitle1Text setFrame:CGRectMake(topN1.integerValue, leftN1.integerValue, textSize1.width, textSize1.height)];
   }
 
   // 実際のテキストの割り当て -> align left -> contents 中央
@@ -448,9 +449,9 @@ RCT_EXPORT_METHOD
   // TODO 文字の場所をコントロールする
   // lineNumを考慮した値をtextSizeが返してくれるか確認
   if ([isSecondTextVertical integerValue] == 1) {
-    [subtitle2Text setFrame:CGRectMake(topN2.integerValue, leftN2.integerValue, textSize2.height * lineNum2 + fontSize2 / 6, textSize2.width * maxLength2 + fontSize2 / 3)];
+    [subtitle2Text setFrame:CGRectMake(topN2.integerValue, leftN2.integerValue, textSize2.height, textSize2.width)];
   } else {
-    [subtitle2Text setFrame:CGRectMake(topN2.integerValue, leftN2.integerValue, textSize2.width * maxLength2 + fontSize2 / 3, textSize2.height * lineNum2 + fontSize2 / 6)];
+    [subtitle2Text setFrame:CGRectMake(topN2.integerValue, leftN2.integerValue, textSize2.width, textSize2.height)];
   }
 
 
@@ -546,8 +547,8 @@ RCT_EXPORT_METHOD
 
   // 要素をparentLayerにまとめにいく
   // ひょっとしたら使われていないけど
-  [parentLayer addSublayer:videoLayer];
   [parentLayer addSublayer:backgroundLayer];
+  [parentLayer addSublayer:videoLayer];
   [parentLayer addSublayer:overlayLayer];
 
   //////////////////////////////////////////////////////////////////////
