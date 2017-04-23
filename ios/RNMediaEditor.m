@@ -142,7 +142,7 @@ RCT_EXPORT_METHOD
   NSString *text = [firstText objectForKey:@"text"];
 
   // create font and size of font
-  UIFont *font = [UIFont boldSystemFontOfSize:fontSize lineBreakMode:NSLineBreakByTruncatingTail];
+  UIFont *font = [UIFont boldSystemFontOfSize:fontSize];
   CGSize size = [text sizeWithFont:font];
 
   // create rect of image
@@ -164,21 +164,21 @@ RCT_EXPORT_METHOD
 
   if ([isFirstTextVertical integerValue] == 1) {
     NSLog(@"Vertical string");
-    textContainer = CGRectMake(point.x - fontSize / 6, point.y - fontSize / 6, size.height * lineNum1 + fontSize / 6, fontSize * maxLength1);
+    textContainer = CGRectMake(point.x - fontSize / 6, point.y - fontSize / 6, size.height * lineNum1 + fontSize / 6, size.height * maxLength1 + fontSize / 3);
     CGContextFillRect(
       UIGraphicsGetCurrentContext(),
       textContainer
     );
     // textContainerの内側に、文字エリアを作る
-    textRect = CGRectMake(point.x + fontSize / 6, point.y + fontSize / 6, size.height * lineNum1, fontSize * maxLength1);
+    textRect = CGRectMake(point.x + fontSize / 6, point.y + fontSize / 6, size.height * lineNum1, size.height * maxLength1);
     // textRect = CGRectMake(point.x, point.y, size.height, size.width);
   } else {
-    textContainer = CGRectMake(point.x - fontSize / 6, point.y - fontSize / 6, size.width * maxLength1, size.height * lineNum1);
+    textContainer = CGRectMake(point.x - fontSize / 6, point.y - fontSize / 6, size.height * maxLength1 + fontSize / 3, size.height * lineNum1 + fontSize / 6);
     CGContextFillRect(
       UIGraphicsGetCurrentContext(),
       textContainer
     );
-    textRect = CGRectMake(point.x + fontSize / 6, point.y + fontSize / 6, size.width * maxLength1, size.height * lineNum1);
+    textRect = CGRectMake(point.x + fontSize / 6, point.y + fontSize / 6, size.height * maxLength1, size.height * lineNum1);
   }
 
   [textColor set];
@@ -240,27 +240,20 @@ RCT_EXPORT_METHOD
 
   if ([isSecondTextVertical integerValue] == 1) {
     NSLog(@"Vertical string");
-    textContainer2 = CGRectMake(point2.x, point2.y, size2.height * lineNum2, size2.height * (text2.length + 1) / 2);
+    textContainer2 = CGRectMake(point2.x - fontSize2 / 6, point2.y - fontSize2 / 6, size2.height * lineNum2 + fontSize2 / 6, size2.height * maxLength2 + fontSize2 / 3);
     CGContextFillRect(
       UIGraphicsGetCurrentContext(),
       textContainer2
     );
-    textRect2 = CGRectMake(point2.x + fontSize2/(lineNum2 + 1), point2.y + size.height / 4, size.height * lineNum2, size.height * text.length);
+    textRect2 = CGRectMake(point2.x + fontSize2 / 6, point2.y + fontSize2 / 6, size2.height * lineNum2, size2.height * maxLength2);
   } else {
-    textContainer2 = CGRectMake(point2.x, point2.y, size.width + fontSize2 * 1, size.height * lineNum2 * 1.5);
+    textContainer2 = CGRectMake(point2.x - fontSize2 / 6, point2.y - fontSize2 / 6, size2.height * maxLength2 + fontSize2 / 3, size2.height * lineNum2 + fontSize2 / 6);
     CGContextFillRect(
       UIGraphicsGetCurrentContext(),
       textContainer2
     );
-    textRect2 = CGRectMake(point2.x + fontSize2/(lineNum2 + 1), point2.y + textContainer2.size.height / 4, size.width, size.height * lineNum2);
+    textRect = CGRectMake(point2.x + fontSize2 / 6, point2.y + fontSize2 / 6, size2.height * maxLength2, size2.height * lineNum2);
   }
-
-  [textColor2 set];
-  [text2 drawInRect:textRect2
-          withFont:font2
-     lineBreakMode:UILineBreakModeClip
-         alignment:UITextAlignmentLeft ];
-
 
 
   UIImage *newImage2 = UIGraphicsGetImageFromCurrentImageContext();
@@ -385,6 +378,9 @@ RCT_EXPORT_METHOD
   NSNumber *lineNumber1 = [firstText objectForKey:@"lineNum"];
   NSInteger lineNum1 = abs(lineNumber1.intValue);
 
+  NSNumber *maxLengthNumber1 = [secondText objectForKey:@"maxLength"];
+  NSInteger maxLength1 = abs(maxLengthNumber1.intValue);
+
   // font sizeをポイントで指定
   [subtitle1Text setFontSize:font1.pointSize];
   
@@ -392,9 +388,9 @@ RCT_EXPORT_METHOD
   // 文字入力エリアの用意
   NSNumber *isFirstTextVertical = [firstText objectForKey:@"vertical"];
   if ([isFirstTextVertical integerValue] == 1) {
-    [subtitle1Text setFrame:CGRectMake(topN1.integerValue, leftN1.integerValue, textSize1.height * lineNum1, textSize1.width)];
+    [subtitle1Text setFrame:CGRectMake(topN1.integerValue, leftN1.integerValue, textSize1.height * lineNum1 + fontSize1 / 6, textSize1.width * maxLength1 + fontSize1 / 3)];
   } else {
-    [subtitle1Text setFrame:CGRectMake(topN1.integerValue, leftN1.integerValue, textSize1.width, textSize1.height * lineNum1)];
+    [subtitle1Text setFrame:CGRectMake(topN1.integerValue, leftN1.integerValue, textSize1.width * maxLength1 + fontSize1 / 3, textSize1.height * lineNum1 + fontSize1 / 6)];
   }
 
   // 実際のテキストの割り当て -> align left -> contents 中央
@@ -444,15 +440,19 @@ RCT_EXPORT_METHOD
   NSNumber *lineNumber2 = [secondText objectForKey:@"lineNum"];
   NSInteger lineNum2 = abs(lineNumber2.intValue);
 
+  NSNumber *maxLengthNumber2 = [secondText objectForKey:@"maxLength"];
+  NSInteger maxLength2 = abs(maxLengthNumber2.intValue);
+
   [subtitle2Text setFontSize:(font2.pointSize)];
 
   // TODO 文字の場所をコントロールする
   // lineNumを考慮した値をtextSizeが返してくれるか確認
   if ([isSecondTextVertical integerValue] == 1) {
-    [subtitle2Text setFrame:CGRectMake(leftN2.integerValue, topN2.integerValue, textSize2.height, textSize2.width * lineNum2)];
+    [subtitle2Text setFrame:CGRectMake(topN2.integerValue, leftN2.integerValue, textSize2.height * lineNum2 + fontSize2 / 6, textSize2.width * maxLength2 + fontSize2 / 3)];
   } else {
-    [subtitle2Text setFrame:CGRectMake(leftN2.integerValue, topN2.integerValue, textSize2.width * lineNum2, textSize2.height)];
+    [subtitle2Text setFrame:CGRectMake(topN2.integerValue, leftN2.integerValue, textSize2.width * maxLength2 + fontSize2 / 3, textSize2.height * lineNum2 + fontSize2 / 6)];
   }
+
 
   [subtitle2Text setString:text2];  // 文字の埋め込み
   [subtitle2Text setAlignmentMode:kCAAlignmentLeft]; // 文字のalignの位置を決めているだけ
