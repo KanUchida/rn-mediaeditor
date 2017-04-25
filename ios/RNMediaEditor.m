@@ -183,7 +183,7 @@ RCT_EXPORT_METHOD
   [textColor set];
   [text drawInRect:textRect  // 文字入れる
           withFont:font  // apply font
-     lineBreakMode:UILineBreakModeClip
+     lineBreakMode:NSLineBreakByClipping
          alignment:UITextAlignmentLeft ];
 
   UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
@@ -368,60 +368,63 @@ RCT_EXPORT_METHOD
   subtitle1Text.contentsScale = [[UIScreen mainScreen] scale];
   NSString *text1 = [firstText objectForKey:@"text"];
 
-  // font指定
-  [subtitle1Text setFont:@"GenEiGothicM-R"];
-  // fontSizeを指定
-  NSNumber *fontSizeNumber1 = [firstText objectForKey:@"fontSize"];
-  NSInteger fontSize1 = abs(fontSizeNumber1.integerValue);
+  if ([text1 length] != 0) {
+    // font指定
+    [subtitle1Text setFont:@"GenEiGothicM-R"];
+    // fontSizeを指定
+    NSNumber *fontSizeNumber1 = [firstText objectForKey:@"fontSize"];
+    NSInteger fontSize1 = abs(fontSizeNumber1.integerValue);
 
-  // fontの指定
-  UIFont *font1 = [UIFont fontWithName:@"GenEiGothicM-R" size:fontSize1];
-  CGSize textSize1 = [text1 sizeWithFont:font1];
+    // fontの指定
+    UIFont *font1 = [UIFont fontWithName:@"GenEiGothicM-R" size:fontSize1];
+    CGSize textSize1 = [text1 sizeWithFont:font1];
 
-  // 位置指定
-  NSNumber *topN1 = [firstText objectForKey:@"top"];
-  NSNumber *leftN1 = [firstText objectForKey:@"left"];
+    // 位置指定
+    NSNumber *topN1 = [firstText objectForKey:@"top"];
+    NSNumber *leftN1 = [firstText objectForKey:@"left"];
 
-  // 行数の指定
-  NSNumber *lineNumber1 = [firstText objectForKey:@"lineNum"];
-  NSInteger lineNum1 = abs(lineNumber1.intValue);
+    // 行数の指定
+    NSNumber *lineNumber1 = [firstText objectForKey:@"lineNum"];
+    NSInteger lineNum1 = abs(lineNumber1.intValue);
 
-  NSNumber *maxLengthNumber1 = [secondText objectForKey:@"maxLength"];
-  NSInteger maxLength1 = abs(maxLengthNumber1.intValue);
+    NSNumber *maxLengthNumber1 = [secondText objectForKey:@"maxLength"];
+    NSInteger maxLength1 = abs(maxLengthNumber1.intValue);
 
-  NSNumber *textNumber1 = [firstText objectForKey:@"textNum"];
+    NSNumber *textNumber1 = [firstText objectForKey:@"textNum"];
     NSInteger textNum1 = abs(textNumber1.intValue);
 
-  // font sizeをポイントで指定
-  [subtitle1Text setFontSize:font1.pointSize];
-  
+    // font sizeをポイントで指定
+    [subtitle1Text setFontSize:font1.pointSize];
+    
 
-  // 文字入力エリアの用意
-  NSNumber *isFirstTextVertical = [firstText objectForKey:@"vertical"];
-  if ([isFirstTextVertical integerValue] == 1) {
-    [subtitle1Text setFrame:CGRectMake(leftN1.integerValue + fontSize1 / 6, topN1.integerValue + fontSize1 / 6, textSize1.width / textNum1 * lineNum1, textSize1.height * maxLength1)];
-  } else {
-    [subtitle1Text setFrame:CGRectMake(leftN1.integerValue + fontSize1 / 6, topN1.integerValue + fontSize1 / 6, textSize1.width / textNum1 * maxLength1, textSize1.height * lineNum1)];
+    // 文字入力エリアの用意
+    // textNumが0の可能性があるから、それで割るとエラーがでる
+    NSNumber *isFirstTextVertical = [firstText objectForKey:@"vertical"];
+    if ([isFirstTextVertical integerValue] == 1) {
+      [subtitle1Text setFrame:CGRectMake(leftN1.integerValue + fontSize1 / 6, topN1.integerValue + fontSize1 / 6, textSize1.width / textNum1 * lineNum1, textSize1.height * maxLength1)];
+    } else {
+      [subtitle1Text setFrame:CGRectMake(leftN1.integerValue + fontSize1 / 6, topN1.integerValue + fontSize1 / 6, textSize1.width / textNum1 * maxLength1, textSize1.height * lineNum1)];
+    }
+
+    // 実際のテキストの割り当て -> align left -> contents 中央
+    [subtitle1Text setString:text1];
+    [subtitle1Text setAlignmentMode:kCAAlignmentLeft];
+    [subtitle1Text setContentsGravity:kCAGravityCenter];
+
+    // 文字色指定
+    UIColor *textColor1 =
+    [self colorFromHexString:[firstText objectForKey:@"textColor"] Alpha:1.0];
+    [subtitle1Text setForegroundColor:[textColor1 CGColor]];
+
+    // 背景の透明度指定
+    NSNumber *backgroundOpacityNumber1 = [firstText objectForKey:@"backgroundOpacity"];
+    float alpha1 = backgroundOpacityNumber1.floatValue;
+
+    // 背景色の指定
+    UIColor *backgroundColor1 = [self colorFromHexString:[firstText objectForKey:@"backgroundColor"] Alpha:alpha1];
+    [subtitle1Text setBackgroundColor:[backgroundColor1 CGColor]];
+
   }
-
-  // 実際のテキストの割り当て -> align left -> contents 中央
-  [subtitle1Text setString:text1];
-  [subtitle1Text setAlignmentMode:kCAAlignmentLeft];
-  [subtitle1Text setContentsGravity:kCAGravityCenter];
-
-  // 文字色指定
-  UIColor *textColor1 =
-  [self colorFromHexString:[firstText objectForKey:@"textColor"] Alpha:1.0];
-  [subtitle1Text setForegroundColor:[textColor1 CGColor]];
-
-  // 背景の透明度指定
-  NSNumber *backgroundOpacityNumber1 = [firstText objectForKey:@"backgroundOpacity"];
-  float alpha1 = backgroundOpacityNumber1.floatValue;
-
-  // 背景色の指定
-  UIColor *backgroundColor1 = [self colorFromHexString:[firstText objectForKey:@"backgroundColor"] Alpha:alpha1];
-  [subtitle1Text setBackgroundColor:[backgroundColor1 CGColor]];
-
 
   ///////////////////////////////////////////////////////////////
   // create text2
@@ -434,59 +437,61 @@ RCT_EXPORT_METHOD
   UIColor *color = [UIColor whiteColor];
   NSString *text2 = [secondText objectForKey:@"text"];
 
-  // create font and size of font
-  [subtitle2Text setFont:@"GenEiGothicM-R"];
-  NSNumber *fontSizeNumber2 = [secondText objectForKey:@"fontSize"];
-  NSInteger fontSize2 = abs(fontSizeNumber2.integerValue);
- 
-  NSNumber *isSecondTextVertical = [secondText objectForKey:@"vertical"];
- 
-  UIFont *font2 = [UIFont fontWithName:@"GenEiGothicM-R" size:fontSize2];
- 
-  CGSize textSize2 = [text2 sizeWithFont:font2];
- 
-  NSNumber *topN2 = [secondText objectForKey:@"top"];
-  NSNumber *leftN2 = [secondText objectForKey:@"left"];
+  if ([text2 length] != 0) {
+    // create font and size of font
+    [subtitle2Text setFont:@"GenEiGothicM-R"];
+    NSNumber *fontSizeNumber2 = [secondText objectForKey:@"fontSize"];
+    NSInteger fontSize2 = abs(fontSizeNumber2.integerValue);
+   
+    NSNumber *isSecondTextVertical = [secondText objectForKey:@"vertical"];
+   
+    UIFont *font2 = [UIFont fontWithName:@"GenEiGothicM-R" size:fontSize2];
+   
+    CGSize textSize2 = [text2 sizeWithFont:font2];
+   
+    NSNumber *topN2 = [secondText objectForKey:@"top"];
+    NSNumber *leftN2 = [secondText objectForKey:@"left"];
 
-  NSNumber *lineNumber2 = [secondText objectForKey:@"lineNum"];
-  NSInteger lineNum2 = abs(lineNumber2.intValue);
+    NSNumber *lineNumber2 = [secondText objectForKey:@"lineNum"];
+    NSInteger lineNum2 = abs(lineNumber2.intValue);
 
-  NSNumber *maxLengthNumber2 = [secondText objectForKey:@"maxLength"];
-  NSInteger maxLength2 = abs(maxLengthNumber2.intValue);
+    NSNumber *maxLengthNumber2 = [secondText objectForKey:@"maxLength"];
+    NSInteger maxLength2 = abs(maxLengthNumber2.intValue);
 
-  NSNumber *textNumber2 = [secondText objectForKey:@"textNum"];
-    NSInteger textNum2 = abs(textNumber2.intValue);
+    NSNumber *textNumber2 = [secondText objectForKey:@"textNum"];
+      NSInteger textNum2 = abs(textNumber2.intValue);
 
 
-  [subtitle2Text setFontSize:(font2.pointSize)];
+    [subtitle2Text setFontSize:(font2.pointSize)];
 
-  // TODO 文字の場所をコントロールする
-  // lineNumを考慮した値をtextSizeが返してくれるか確認
-  if ([isSecondTextVertical integerValue] == 1) {
-    [subtitle2Text setFrame:CGRectMake(leftN2.integerValue + fontSize2 / 6, topN2.integerValue + fontSize2 / 6, textSize2.width / textNum2 * lineNum2, textSize2.height / lineNum2 * maxLength2)];
-  } else {
-    [subtitle2Text setFrame:CGRectMake(leftN2.integerValue + fontSize2 / 6, topN2.integerValue + fontSize2 / 6, textSize2.width / textNum2 * maxLength2, textSize2.height * lineNum2)];  // widthたりない
+    // TODO 文字の場所をコントロールする
+    // lineNumを考慮した値をtextSizeが返してくれるか確認
+    // ここでエラー
+
+    if ([isSecondTextVertical integerValue] == 1) {
+      [subtitle2Text setFrame:CGRectMake(leftN2.integerValue + fontSize2 / 6, topN2.integerValue + fontSize2 / 6, textSize2.width / textNum2 * lineNum2, textSize2.height / lineNum2 * maxLength2)];
+    } else {
+      [subtitle2Text setFrame:CGRectMake(leftN2.integerValue + fontSize2 / 6, topN2.integerValue + fontSize2 / 6, textSize2.width / textNum2 * maxLength2, textSize2.height * lineNum2)];  // widthたりない
+    }
+
+    [subtitle2Text setString:text2];  // 文字の埋め込み
+    [subtitle2Text setAlignmentMode:kCAAlignmentLeft]; // 文字のalignの位置を決めているだけ
+
+    // 文字色の指定
+    UIColor *textColor2 =
+    [self colorFromHexString:[secondText objectForKey:@"textColor"] Alpha:1.0];
+    [subtitle2Text setForegroundColor:[textColor2 CGColor]];
+
+    // Opacityの指定
+    NSNumber *backgroundOpacityNumber2 = [secondText objectForKey:@"backgroundOpacity"];
+    float alpha2 = backgroundOpacityNumber2.floatValue;
+
+    // 背景色の指定
+    UIColor *backgroundColor2 = [self colorFromHexString:[secondText objectForKey:@"backgroundColor"] Alpha:alpha2];
+    [subtitle2Text setBackgroundColor:[backgroundColor2 CGColor]];
   }
-
-  [subtitle2Text setString:text2];  // 文字の埋め込み
-  [subtitle2Text setAlignmentMode:kCAAlignmentLeft]; // 文字のalignの位置を決めているだけ
-
-  // 文字色の指定
-  UIColor *textColor2 =
-  [self colorFromHexString:[secondText objectForKey:@"textColor"] Alpha:1.0];
-  [subtitle2Text setForegroundColor:[textColor2 CGColor]];
-
-  // Opacityの指定
-  NSNumber *backgroundOpacityNumber2 = [secondText objectForKey:@"backgroundOpacity"];
-  float alpha2 = backgroundOpacityNumber2.floatValue;
-
-  // 背景色の指定
-  UIColor *backgroundColor2 = [self colorFromHexString:[secondText objectForKey:@"backgroundColor"] Alpha:alpha2];
-  [subtitle2Text setBackgroundColor:[backgroundColor2 CGColor]];
-
   // end create text2
   /////////////////////////////////////////////
- 
 
   /////////////////////////////////////////////
   // 残り３秒で現れる文字列の動作とlayerを作成する
@@ -541,7 +546,6 @@ RCT_EXPORT_METHOD
   parentLayer.frame = CGRectMake(0, 0, size.width, size.height);
   videoLayer.frame = CGRectMake(0, 0, size.width, size.height);
 
-
 /*
   // check layer area
 
@@ -552,11 +556,11 @@ RCT_EXPORT_METHOD
   // blue if appears
   UIColor *videoLayerColor = [self colorFromHexString:@"#1c1321" Alpha:alpha2];
   [videoLayer setBackgroundColor:[videoLayerColor CGColor]];
-*/
 
   // red if appears
   UIColor *overlayLayerColor = [self colorFromHexString:@"#ca2e39" Alpha: 0.5];
   [overlayLayer setBackgroundColor:[overlayLayerColor CGColor]];
+*/
 
   // 要素をparentLayerにまとめにいく
   // ひょっとしたら使われていないけど
@@ -659,4 +663,3 @@ RCT_EXPORT_METHOD
 
 
 @end
-
