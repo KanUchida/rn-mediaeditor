@@ -333,13 +333,14 @@ RCT_EXPORT_METHOD
 
   UIColor *videoBackgroundColor = [self colorFromHexString:@"#F6F5F4" Alpha:1.0];
   // こうすると、きれいな正方形でバックグラウンドカラーがつく？
+/*
   borderImage = [self imageWithColor:videoBackgroundColor rectSize:CGRectMake(-(size.height - size.width)/2, 0, size.width, size.width)];
 
   CALayer *backgroundLayer = [CALayer layer];
   [backgroundLayer setContents:(id)[borderImage CGImage]];
   backgroundLayer.frame = CGRectMake(0, 0, size.width, size.height);
   [backgroundLayer setMasksToBounds:YES];
-
+*/
 
   // subclass of AVVideoCompositionLayerInstruction
   // this is used to modify the transform, cropping, and opacity ramps to apply to a given track in a composition.
@@ -357,6 +358,18 @@ RCT_EXPORT_METHOD
   // 特に何をしているわけでもないけど、とりあえずlayerInstructionsをもたせているのがこの時点での状況
   // このあとも出てこないから、この辺なくても良い気がする
   mainInstruction.layerInstructions = [NSArray arrayWithObject:layerInstruction];
+
+
+  /////////////////////////////////////////////
+  // 残り３秒で現れる文字列の動作とlayerを作成する
+
+  // ２つの文字を１つに合成し、表示する準備
+  CALayer *overlayLayer = [CALayer layer];
+  // this is supposed to write here according to docs, I don't understand completly
+  overlayLayer.contentsScale = [[UIScreen mainScreen] scale];
+
+  // define layer
+  overlayLayer.frame = CGRectMake(0, 0, size.width, size.height);
 
 
   ///////////////////////////////////////////////////////////////////////////////////
@@ -387,7 +400,7 @@ RCT_EXPORT_METHOD
     NSNumber *lineNumber1 = [firstText objectForKey:@"lineNum"];
     NSInteger lineNum1 = abs(lineNumber1.intValue);
 
-    NSNumber *maxLengthNumber1 = [secondText objectForKey:@"maxLength"];
+    NSNumber *maxLengthNumber1 = [firstText objectForKey:@"maxLength"];
     NSInteger maxLength1 = abs(maxLengthNumber1.intValue);
 
     NSNumber *textNumber1 = [firstText objectForKey:@"textNum"];
@@ -424,6 +437,7 @@ RCT_EXPORT_METHOD
     UIColor *backgroundColor1 = [self colorFromHexString:[firstText objectForKey:@"backgroundColor"] Alpha:alpha1];
     [subtitle1Text setBackgroundColor:[backgroundColor1 CGColor]];
 
+    [overlayLayer addSublayer:subtitle1Text];
   }
 
   ///////////////////////////////////////////////////////////////
@@ -489,22 +503,15 @@ RCT_EXPORT_METHOD
     // 背景色の指定
     UIColor *backgroundColor2 = [self colorFromHexString:[secondText objectForKey:@"backgroundColor"] Alpha:alpha2];
     [subtitle2Text setBackgroundColor:[backgroundColor2 CGColor]];
+
+    // 上のlayerに埋め込む
+    [overlayLayer addSublayer:subtitle2Text];
   }
   // end create text2
   /////////////////////////////////////////////
 
-  /////////////////////////////////////////////
-  // 残り３秒で現れる文字列の動作とlayerを作成する
 
-  // ２つの文字を１つに合成し、表示する準備
-  CALayer *overlayLayer = [CALayer layer];
-  // this is supposed to write here according to docs, I don't understand completly
-  overlayLayer.contentsScale = [[UIScreen mainScreen] scale];
-
-  // define layer
-  overlayLayer.frame = CGRectMake(0, 0, size.width, size.height);
-  [overlayLayer addSublayer:subtitle1Text];
-  [overlayLayer addSublayer:subtitle2Text];
+  // settings for overlay layer
   [overlayLayer setMasksToBounds:YES];
   [overlayLayer setOpacity:0.0];
   [overlayLayer displayIfNeeded];
