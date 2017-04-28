@@ -47,6 +47,175 @@ RCT_EXPORT_MODULE()
                             blue:(rgbValue & 0xFF)/255.0 alpha:alpha];
 }
 
+// borderImage = [self imageWithColor:videoBackgroundColor rectSize:CGRectMake(-(size.height - size.width)/2, 0, size.width, size.width)];
+- (UIImage *)imageWithColor:(UIColor *)color rectSize:(CGRect)imageSize {
+    CGRect rect = imageSize;
+    UIGraphicsBeginImageContextWithOptions(rect.size, NO, 0);
+    [color setFill];
+    UIRectFill(rect);   // Fill it with your color
+    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+ 
+    return image;
+}
+
+
+// jpegData = [self returnJpgData:firstText image:()image];
+// return jpgData;
+- (NSData *)returnJpgData:(NSDictionary *)textInfo image:(UIImage *)image{
+  // again to second text
+  NSNumber *fontSizeNumber = [textInfo objectForKey:@"fontSize"];
+  NSInteger fontSize = abs(fontSizeNumber.intValue);
+
+  NSNumber *lineNumber = [textInfo objectForKey:@"lineNum"];
+  NSInteger lineNum = abs(lineNumber.intValue);
+
+  NSNumber *maxLengthNumber = [textInfo objectForKey:@"maxLength"];
+  NSInteger maxLength = abs(maxLengthNumber.intValue);  
+
+  UIColor *textColor =
+  [self colorFromHexString:[textInfo objectForKey:@"textColor"] Alpha:1.0];
+
+  NSNumber *backgroundOpacityNumber = [textInfo objectForKey:@"backgroundOpacity"];
+  float backgroundOpacity = backgroundOpacityNumber.floatValue;
+
+  UIColor *backgroundColor =
+  [self colorFromHexString:[textInfo objectForKey:@"backgroundColor"] Alpha:backgroundOpacity];
+
+  NSNumber *topNumber = [textInfo objectForKey:@"top"];
+  NSNumber *leftNumber = [textInfo objectForKey:@"left"];
+  CGFloat top = topNumber.floatValue;
+  CGFloat left = leftNumber.floatValue;
+
+  NSString *text = [textInfo objectForKey:@"text"];
+
+  // create font and size of font
+  UIFont *font = [UIFont boldSystemFontOfSize:fontSize];
+  CGSize size = [text sizeWithFont:font];
+
+  // create rect of image
+  // ここから繰り返し
+  UIGraphicsBeginImageContext(image.size);
+  [image drawInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
+
+  // wrapper rect
+  CGRect rect = CGRectMake(0, 0, image.size.width, image.size.height);
+
+  // the base point of text rect
+  CGPoint point = CGPointMake(left, top);
+  [backgroundColor set];
+
+  CGRect textContainer;
+  CGRect textRect;
+  NSNumber *isTextInfoVertical = [textInfo objectForKey:@"vertical"];
+
+  if ([isTextInfoVertical integerValue] == 1) {
+  NSLog(@"Vertical string");
+  textContainer = CGRectMake(point.x - fontSize / 6, point.y - fontSize / 6,
+   size.height * lineNum + fontSize / 6, size.height * maxLength + fontSize / 3);
+  CGContextFillRect(
+    UIGraphicsGetCurrentContext(),
+    textContainer
+  );
+  textRect = CGRectMake(point.x + fontSize / 6, point.y + fontSize / 6, size.height * lineNum, size.height * maxLength);
+  } else {
+  textContainer = CGRectMake(point.x - fontSize / 6, point.y - fontSize / 6, size.height * maxLength + fontSize / 3, size.height * lineNum + fontSize / 6);
+  CGContextFillRect(
+    UIGraphicsGetCurrentContext(),
+    textContainer
+  );
+  textRect = CGRectMake(point.x + fontSize / 6, point.y + fontSize / 6, size.height * maxLength, size.height * lineNum);
+  }
+
+
+  [textColor set];
+  [text drawInRect:textRect  // 文字入れる
+        withFont:font  // apply font
+   lineBreakMode:UILineBreakModeClip
+       alignment:UITextAlignmentLeft ];
+
+
+  UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
+  UIGraphicsEndImageContext();
+
+
+  NSData* UIImageJPEGRepresentedData = [[NSData alloc] initWithData:UIImageJPEGRepresentation(newImage, 1.0f)];
+
+  return UIImageJPEGRepresentedData;
+}
+
+
+// [self embedTextOnCALayer:firstText targetLayer:overlayLayer]
+- (void)embedTextOnCALayer:(NSDictionary *)textInfo targetLayer:(CALayer *)layer {
+  // embed text on CALayer
+  CATextLayer *subtitleText = [[CATextLayer alloc] init];
+  // Docs say this is supposed to be written for layer statement
+  subtitleText.contentsScale = [[UIScreen mainScreen] scale];
+  NSString *text = [textInfo objectForKey:@"text"];
+
+  if ([text length] != 0) {
+    // font指定
+    [subtitleText setFont:@"GenEiGothicM-R"];
+    // fontSizeを指定
+    NSNumber *fontSizeNumber = [textInfo objectForKey:@"fontSize"];
+    NSInteger fontSize = abs(fontSizeNumber.integerValue);
+
+    // fontの指定
+    UIFont *font = [UIFont fontWithName:@"GenEiGothicM-R" size:fontSize];
+    CGSize textSize = [text sizeWithFont:font];
+
+    // 位置指定
+    NSNumber *topN = [textInfo objectForKey:@"top"];
+    NSNumber *leftN = [textInfo objectForKey:@"left"];
+
+    // 行数の指定
+    NSNumber *lineNumber = [textInfo objectForKey:@"lineNum"];
+    NSInteger lineNum = abs(lineNumber.intValue);
+
+    NSNumber *maxLengthNumber = [textInfo objectForKey:@"maxLength"];
+    NSInteger maxLength = abs(maxLengthNumber.intValue);
+
+    NSNumber *textNumber = [textInfo objectForKey:@"textNum"];
+    NSInteger textNum = abs(textNumber.intValue);
+
+    // font sizeをポイントで指定
+    [subtitleText setFontSize:font.pointSize];
+    
+
+    // 文字入力エリアの用意
+    // textNumが0の可能性があるから、それで割るとエラーがでる
+    NSNumber *istextInfoVertical = [textInfo objectForKey:@"vertical"];
+    if ([istextInfoVertical integerValue] == 1) {
+      [subtitleText setFrame:CGRectMake(leftN.integerValue + fontSize / 6, topN.integerValue + fontSize / 6, textSize.width / textNum * lineNum, textSize.height * maxLength)];
+    } else {
+      [subtitleText setFrame:CGRectMake(leftN.integerValue + fontSize / 6, topN.integerValue + fontSize / 6, textSize.width / textNum * maxLength, textSize.height * lineNum)];
+    }
+
+    // 実際のテキストの割り当て -> align left -> contents 中央
+    [subtitleText setString:text];
+    [subtitleText setAlignmentMode:kCAAlignmentLeft];
+    [subtitleText setContentsGravity:kCAGravityCenter];
+
+    // 文字色指定
+    UIColor *textColor =
+    [self colorFromHexString:[textInfo objectForKey:@"textColor"] Alpha:1.0];
+    [subtitleText setForegroundColor:[textColor CGColor]];
+
+    // 背景の透明度指定
+    NSNumber *backgroundOpacityNumber = [textInfo objectForKey:@"backgroundOpacity"];
+    float alpha = backgroundOpacityNumber.floatValue;
+
+    // 背景色の指定
+    UIColor *backgroundColor = [self colorFromHexString:[textInfo objectForKey:@"backgroundColor"] Alpha:alpha];
+    [subtitleText setBackgroundColor:[backgroundColor CGColor]];
+
+    NSLog(@"Test - subtitleText.frame : %@", NSStringFromCGRect(subtitleText.frame));
+    NSLog(@"Test - subtitleText.bounds: %@", NSStringFromCGRect(subtitleText.bounds));
+
+    [layer addSublayer:subtitleText];
+  }
+}
+
 
 /*
 * options
@@ -86,6 +255,7 @@ RCT_EXPORT_METHOD
 }
 
 
+// actually embeding text
 -(void)
   embedTextOnImage:(NSDictionary *)options
   resolver:(RCTPromiseResolveBlock)resolve
@@ -99,159 +269,22 @@ RCT_EXPORT_METHOD
   NSData *data = [[NSData alloc]
                   initWithBase64EncodedString:base64str
                   options:NSDataBase64DecodingIgnoreUnknownCharacters];
-  UIImage *image = [UIImage imageWithData:data];
-
-
-  NSNumber *fontSizeNumber = [firstText objectForKey:@"fontSize"];
-  NSInteger fontSize = abs(fontSizeNumber.intValue);
   
-  NSNumber *lineNumber1 = [firstText objectForKey:@"lineNum"];
-  NSInteger lineNum1 = abs(lineNumber1.intValue);
+  // １文字目の埋め込み
+  UIImage *image = [UIImage imageWithData:data];
+  NSData* jpgData = [self returnJpgData:firstText image:image];
 
-  UIColor *textColor =
-    [self colorFromHexString:[firstText objectForKey:@"textColor"] Alpha:1.0];
-
-  NSNumber *backgroundOpacityNumber = [firstText objectForKey:@"backgroundOpacity"];
-  float backgroundOpacity = backgroundOpacityNumber.floatValue;
-
-  UIColor *backgroundColor =
-    [self colorFromHexString:[firstText objectForKey:@"backgroundColor"] Alpha:backgroundOpacity];
-
-  NSNumber *topNumber = [firstText objectForKey:@"top"];
-  NSNumber *leftNumber = [firstText objectForKey:@"left"];
-  CGFloat top = topNumber.floatValue;
-  CGFloat left = leftNumber.floatValue;
-
-  NSString *text = [firstText objectForKey:@"text"];
-
-  // create font and size of font
-  UIFont *font = [UIFont boldSystemFontOfSize:fontSize];
-  CGSize size = [text sizeWithFont:font];
-
-  // create rect of image
-  UIGraphicsBeginImageContext(image.size);
-  [image drawInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
-
-  // wrapper rect
-  CGRect rect = CGRectMake(0, 0, image.size.width, image.size.height);
-
-  // the base point of text rect
-  CGPoint point = CGPointMake(left, top);
-
-
-  [backgroundColor set];
-
-  NSNumber *isFirstTextVertical = [firstText objectForKey:@"vertical"];
-
-  CGRect textContainer;
-  CGRect textRect;
-  if ([isFirstTextVertical integerValue] == 1) {
-    NSLog(@"Vertical string");
-    textContainer = CGRectMake(point.x, point.y, size.height * lineNum1, size.height * (text.length + 1) / 2);
-    CGContextFillRect(
-      UIGraphicsGetCurrentContext(),
-      textContainer
-    );
-    textRect = CGRectMake(point.x + fontSize/(lineNum1 + 1), point.y + size.height / 4, size.height * lineNum1, size.height * text.length);
-  } else {
-    textContainer = CGRectMake(point.x, point.y, size.width + fontSize * 1, size.height * lineNum1 * 1.5);
-    CGContextFillRect(
-      UIGraphicsGetCurrentContext(),
-      textContainer
-    );
-    textRect = CGRectMake(point.x + fontSize/(lineNum1 + 1), point.y + textContainer.size.height / 4, size.width, size.height * lineNum1);
-  }
-
-  [textColor set];
-  [text drawInRect:textRect
-          withFont:font
-     lineBreakMode:UILineBreakModeClip
-         alignment:UITextAlignmentLeft ];
-
-  UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
-  UIGraphicsEndImageContext();
-  NSData* jpgData = [[NSData alloc] initWithData:UIImageJPEGRepresentation(newImage, 1.0f)];
+  // ２文字目の埋め込み
   UIImage *image2 = [UIImage imageWithData:jpgData];
+  NSData* jpgData2 = [self returnJpgData:secondText image:image2];
 
-
-  // again to second text
-  NSNumber *fontSizeNumber2 = [secondText objectForKey:@"fontSize"];
-  NSInteger fontSize2 = abs(fontSizeNumber2.intValue);
-
-  NSNumber *lineNumber2 = [secondText objectForKey:@"lineNum"];
-  NSInteger lineNum2 = abs(lineNumber2.intValue);
-
-  UIColor *textColor2 =
-  [self colorFromHexString:[secondText objectForKey:@"textColor"] Alpha:1.0];
-
-  NSNumber *backgroundOpacityNumber2 = [secondText objectForKey:@"backgroundOpacity"];
-  float backgroundOpacity2 = backgroundOpacityNumber2.floatValue;
-
-  UIColor *backgroundColor2 =
-  [self colorFromHexString:[secondText objectForKey:@"backgroundColor"] Alpha:backgroundOpacity2];
-
-  NSNumber *topNumber2 = [secondText objectForKey:@"top"];
-  NSNumber *leftNumber2 = [secondText objectForKey:@"left"];
-  CGFloat top2 = topNumber2.floatValue;
-  CGFloat left2 = leftNumber2.floatValue;
-
-  NSString *text2 = [secondText objectForKey:@"text"];
-
-  // create font and size of font
-  UIFont *font2 = [UIFont boldSystemFontOfSize:fontSize2];
-  CGSize size2 = [text2 sizeWithFont:font2];
-
-  // create rect of image
-  UIGraphicsBeginImageContext(image.size);
-  [image2 drawInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
-
-  // wrapper rect
-  CGRect rect2 = CGRectMake(0, 0, image.size.width, image.size.height);
-
-  // the base point of text rect
-  CGPoint point2 = CGPointMake(left2, top2);
-  [backgroundColor2 set];
-
-  CGRect textContainer2;
-  CGRect textRect2;
-  NSNumber *isSecondTextVertical = [secondText objectForKey:@"vertical"];
-
-  if ([isSecondTextVertical integerValue] == 1) {
-    NSLog(@"Vertical string");
-    textContainer2 = CGRectMake(point2.x, point2.y, size2.height * lineNum2, size2.height * (text2.length + 1) / 2);
-    CGContextFillRect(
-      UIGraphicsGetCurrentContext(),
-      textContainer2
-    );
-    textRect2 = CGRectMake(point2.x + fontSize2/(lineNum2 + 1), point2.y + size.height / 4, size.height * lineNum2, size.height * text.length);
-  } else {
-    textContainer2 = CGRectMake(point2.x, point2.y, size.width + fontSize2 * 1, size.height * lineNum2 * 1.5);
-    CGContextFillRect(
-      UIGraphicsGetCurrentContext(),
-      textContainer2
-    );
-    textRect2 = CGRectMake(point2.x + fontSize2/(lineNum2 + 1), point2.y + textContainer2.size.height / 4, size.width, size.height * lineNum2);
-  }
-
-  [textColor2 set];
-  [text2 drawInRect:textRect2
-          withFont:font2
-     lineBreakMode:UILineBreakModeClip
-         alignment:UITextAlignmentLeft ];
-
-
-  UIImage *newImage2 = UIGraphicsGetImageFromCurrentImageContext();
-  UIGraphicsEndImageContext();
-  NSData* jpgData2 = [[NSData alloc] initWithData:UIImageJPEGRepresentation(newImage2, 1.0f)];
+  // base64 encoding 
   NSString* jpg64Str = [jpgData2 base64EncodedStringWithOptions:NSDataBase64Encoding76CharacterLineLength];
 
-
+  // 返す
   resolve(@[@"embed text on image", jpg64Str]);
+
 }
-
-
-
-
 
 -(void)embedTextOnVideo:(NSDictionary *)options
                resolver:(RCTPromiseResolveBlock)resolve
@@ -283,8 +316,10 @@ RCT_EXPORT_METHOD
   AVAssetTrack *baseVideoTrack = [[videoAsset tracksWithMediaType:AVMediaTypeVideo] objectAtIndex:0];
   AVAssetTrack *baseAudioTrack = [[videoAsset tracksWithMediaType:AVMediaTypeAudio] objectAtIndex:0];
   
-  // とった動画のwidth / height を取得
+  // とった動画のwidth / height を取得し、縦横入れ替え
   CGSize size = baseVideoTrack.naturalSize;
+  size = CGSizeMake(size.height, size.width);
+
 
   // 取り出した、可変のトラックに、時間の要素を追加してあげる
   // 同じように、音声にも追加してあげる
@@ -302,167 +337,72 @@ RCT_EXPORT_METHOD
   // 時間軸をもたせる
   mainInstruction.timeRange = CMTimeRangeMake(kCMTimeZero, [mixComposition duration]);
 
+  /////////////////////////////////////////////////////////////////////
+  // set background color
+
+  UIImage *borderImage = nil;
+
+  UIColor *videoBackgroundColor = [self colorFromHexString:@"#F6F5F4" Alpha:1.0];
+  // こうすると、きれいな正方形でバックグラウンドカラーがつく？
+/*
+  borderImage = [self imageWithColor:videoBackgroundColor rectSize:CGRectMake(-(size.height - size.width)/2, 0, size.width, size.width)];
+
+  CALayer *backgroundLayer = [CALayer layer];
+  [backgroundLayer setContents:(id)[borderImage CGImage]];
+  backgroundLayer.frame = CGRectMake(0, 0, size.width, size.height);
+  [backgroundLayer setMasksToBounds:YES];
+*/
+
   // subclass of AVVideoCompositionLayerInstruction
   // this is used to modify the transform, cropping, and opacity ramps to apply to a given track in a composition.
   // mutableCompositionVideoTrack このトラックに対する、新しい mutable video composition layer instruction を作成
   AVMutableVideoCompositionLayerInstruction *layerInstruction = [AVMutableVideoCompositionLayerInstruction videoCompositionLayerInstructionWithAssetTrack:mutableCompositionVideoTrack];
 
-  // 回転試行錯誤その１
   // Apply the original transform.
-  // baseVideoTrackの向きがもともとportraitsだったら、これは結局向きが変わらない
-  // 変わらないから、localに保存された時点で向きが変わっちゃっている
-
-  size = CGSizeMake(size.height, size.width);  // 左上を、縦表示の時の位置に移動？
+  // baseVideoTrackの向きがdefaultでportraits（横長でホームボタンじゃない方が上）
+  // 縦固定で扱いたければ、全て入れかえて扱わなければいけない
   CGAffineTransform translateToCenter = CGAffineTransformMakeTranslation(size.width, 0);  // 平行移動
   CGAffineTransform rotation = CGAffineTransformMakeRotation(M_PI_2);  // 回転作業 おっけーっぽい
   CGAffineTransform mixedTransform = CGAffineTransformConcat(rotation, translateToCenter);  // 合成
   [layerInstruction setTransform:mixedTransform atTime:kCMTimeZero];
-
 
   // 特に何をしているわけでもないけど、とりあえずlayerInstructionsをもたせているのがこの時点での状況
   // このあとも出てこないから、この辺なくても良い気がする
   mainInstruction.layerInstructions = [NSArray arrayWithObject:layerInstruction];
 
 
-  ///////////////////////////////////////////////////////////////////////////////////
-  // create font and size of font
-  
-  // create text1
-  CATextLayer *subtitle1Text = [[CATextLayer alloc] init];
-  subtitle1Text.contentsScale = [[UIScreen mainScreen] scale];
-  NSString *text1 = [firstText objectForKey:@"text"];
-
-  // font指定
-  [subtitle1Text setFont:@"GenEiGothicM-R"];
-  // fontSizeを指定
-  NSNumber *fontSizeNumber1 = [firstText objectForKey:@"fontSize"];
-  NSInteger fontSize1 = abs(fontSizeNumber1.integerValue * 0.9);
-
-  // fontの指定
-  UIFont *font1 = [UIFont fontWithName:@"GenEiGothicM-R" size:fontSize1];
-  CGSize textSize1 = [text1 sizeWithFont:font1];
-
-  // 位置指定
-  NSNumber *topN1 = [firstText objectForKey:@"top"];
-  NSNumber *leftN1 = [firstText objectForKey:@"left"];
-
-  // 行数の指定
-  NSNumber *lineNumber1 = [firstText objectForKey:@"lineNum"];
-  NSInteger lineNum1 = abs(lineNumber1.intValue);
-
-  // font sizeをポイントで指定
-  [subtitle1Text setFontSize:font1.pointSize];
-  
-
-  // 文字入力エリアの用意
-  NSNumber *isFirstTextVertical = [firstText objectForKey:@"vertical"];
-  if ([isFirstTextVertical integerValue] == 1) {
-    // [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, topN1.integerValue, textSize1.height * lineNum1, textSize1.width)];
-    [subtitle1Text setFrame:CGRectMake(0, 0, textSize1.height * lineNum1, textSize1.width)];
-  } else {
-    // [subtitle1Text setFrame:CGRectMake(leftN1.integerValue, topN1.integerValue, textSize1.width, textSize1.height * lineNum1)];
-    [subtitle1Text setFrame:CGRectMake(0, 0, textSize1.width, textSize1.height * lineNum1)];
-  }
-
-  // 実際のテキストの割り当て -> align left -> contents 中央
-  [subtitle1Text setString:text1];
-  [subtitle1Text setAlignmentMode:kCAAlignmentLeft];
-  [subtitle1Text setContentsGravity:kCAGravityCenter];
-
-  // 文字色指定
-  UIColor *textColor1 =
-  [self colorFromHexString:[firstText objectForKey:@"textColor"] Alpha:1.0];
-  [subtitle1Text setForegroundColor:[textColor1 CGColor]];
-
-  // 背景の透明度指定
-  NSNumber *backgroundOpacityNumber1 = [firstText objectForKey:@"backgroundOpacity"];
-  float alpha1 = backgroundOpacityNumber1.floatValue;
-
-  // 背景色の指定
-  UIColor *backgroundColor1 = [self colorFromHexString:[firstText objectForKey:@"backgroundColor"] Alpha:alpha1];
-  [subtitle1Text setBackgroundColor:[backgroundColor1 CGColor]];
-
-
-  ///////////////////////////////////////////////////////////////
-  // create text2
-  // same things to do
-  CATextLayer *subtitle2Text = [[CATextLayer alloc] init];
-  subtitle2Text.contentsScale = [[UIScreen mainScreen] scale];;
-
-  // frame作らなくていいの？
-  
-  UIColor *color = [UIColor whiteColor];
-  NSString *text2 = [secondText objectForKey:@"text"];
-
-  // create font and size of font
-  [subtitle2Text setFont:@"GenEiGothicM-R"];
-  NSNumber *fontSizeNumber2 = [secondText objectForKey:@"fontSize"];
-  NSInteger fontSize2 = abs(fontSizeNumber2.integerValue * 0.5);
-  NSNumber *isSecondTextVertical = [secondText objectForKey:@"vertical"];
-  UIFont *font2 = [UIFont fontWithName:@"GenEiGothicM-R" size:fontSize2];
-  CGSize textSize2 = [text2 sizeWithFont:font2];
-  NSNumber *topN2 = [secondText objectForKey:@"top"];
-  NSNumber *leftN2 = [secondText objectForKey:@"left"];
-
-  NSNumber *lineNumber2 = [secondText objectForKey:@"lineNum"];
-  NSInteger lineNum2 = abs(lineNumber2.intValue);
-
-  [subtitle2Text setFontSize:font2.pointSize];
-
-  // TODO 文字の場所をコントロールする
-  if ([isSecondTextVertical integerValue] == 1) {
-    [subtitle2Text setFrame:CGRectMake(leftN2.integerValue, size.height - topN2.integerValue, textSize2.height, textSize2.width)];
-  } else {
-    [subtitle2Text setFrame:CGRectMake(leftN2.integerValue, size.height - topN2.integerValue, textSize2.width, textSize2.height)];
-  }
-
-  [subtitle2Text setString:text2];  // 文字の埋め込み
-  [subtitle2Text setAlignmentMode:kCAAlignmentLeft]; // 文字のalignの位置を決めているだけ
-
-  // 文字色の指定
-  UIColor *textColor2 =
-  [self colorFromHexString:[secondText objectForKey:@"textColor"] Alpha:1.0];
-  [subtitle2Text setForegroundColor:[textColor2 CGColor]];  // 色を指定
-
-  // Opacityの指定
-  NSNumber *backgroundOpacityNumber2 = [secondText objectForKey:@"backgroundOpacity"];
-  float alpha2 = backgroundOpacityNumber2.floatValue;
-
-  // 背景色の指定
-  UIColor *backgroundColor2 = [self colorFromHexString:[secondText objectForKey:@"backgroundColor"] Alpha:alpha2];
-  [subtitle2Text setBackgroundColor:[backgroundColor2 CGColor]];
-
-  // end create text2
-  /////////////////////////////////////////////
- 
-
   /////////////////////////////////////////////
   // 残り３秒で現れる文字列の動作とlayerを作成する
 
   // ２つの文字を１つに合成し、表示する準備
   CALayer *overlayLayer = [CALayer layer];
+  // this is supposed to write here according to docs, I don't understand completly
+  overlayLayer.contentsScale = [[UIScreen mainScreen] scale];
 
-  // 幅を指定: 画面一杯
+  // define layer
   overlayLayer.frame = CGRectMake(0, 0, size.width, size.height);
-  [overlayLayer addSublayer:subtitle1Text];
-  [overlayLayer addSublayer:subtitle2Text];
+  [self embedTextOnCALayer:firstText targetLayer:overlayLayer];
+  [self embedTextOnCALayer:secondText targetLayer:overlayLayer];
+
+
+  // settings for overlay layer
   [overlayLayer setMasksToBounds:YES];
   [overlayLayer setOpacity:0.0];
   [overlayLayer displayIfNeeded];
-  // [overlayLayer setGeometryFlipped:YES];
+  [overlayLayer setGeometryFlipped:YES];
   
 
   ////////////////////////////////////////////////////
   // 埋め込む文字がどのように動作するのか決めている部分
   // 
 
-  // 後ろから３秒に入れ込むために、長さを指定
+  // set text layer to last three seconds
   CMTime videoDuration = videoAsset.duration;
   CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"opacity"];
   [animation setDuration:0];
   [animation setFromValue:[NSNumber numberWithFloat:0.0]];
   [animation setToValue:[NSNumber numberWithFloat:1.0]];
-  [animation setBeginTime:CMTimeGetSeconds(videoDuration)-3];  // 最後から３秒で開始
+  [animation setBeginTime:CMTimeGetSeconds(videoDuration)-3];
   [animation setRemovedOnCompletion:NO];
   [animation setFillMode:kCAFillModeForwards];
   [overlayLayer addAnimation:animation forKey:@"animateOpacity"];
@@ -470,10 +410,14 @@ RCT_EXPORT_METHOD
 
   /////////////////////////////////////////////////////
   // create parent layer
-  // この２つのlayerなくても何にも問題ないはず
 
   CALayer *parentLayer = [CALayer layer];
   CALayer *videoLayer = [CALayer layer];
+
+  // this is supposed to be written here, I don't understand reasons completly
+  parentLayer.contentsScale = [[UIScreen mainScreen] scale];;
+  videoLayer.contentsScale = [[UIScreen mainScreen] scale];;
+
 
   // 左上を原点にした座標を取得。そこを基準にする
   parentLayer.anchorPoint = CGPointMake(0, 0);
@@ -483,30 +427,33 @@ RCT_EXPORT_METHOD
   parentLayer.frame = CGRectMake(0, 0, size.width, size.height);
   videoLayer.frame = CGRectMake(0, 0, size.width, size.height);
 
-
 /*
-  // 下二つは表示されないから、videoLayerは動画の合成の際には使われてない layer??
+  // check layer area
 
-  // おれんじ！
+  // orange if appears
   UIColor *parentLayerColor = [self colorFromHexString:@"#f98829" Alpha:alpha2];
   [parentLayer setBackgroundColor:[parentLayerColor CGColor]];
 
-  // 青っぽい色
+  // blue if appears
   UIColor *videoLayerColor = [self colorFromHexString:@"#1c1321" Alpha:alpha2];
   [videoLayer setBackgroundColor:[videoLayerColor CGColor]];
-*/
 
-  // red
-  UIColor *overlayLayerColor = [self colorFromHexString:@"#ca2e39" Alpha:alpha2];
+  // red if appears
+  UIColor *overlayLayerColor = [self colorFromHexString:@"#ca2e39" Alpha: 0.5];
   [overlayLayer setBackgroundColor:[overlayLayerColor CGColor]];
+*/
 
   // 要素をparentLayerにまとめにいく
   // ひょっとしたら使われていないけど
+  // [parentLayer addSublayer:backgroundLayer];
   [parentLayer addSublayer:videoLayer];
   [parentLayer addSublayer:overlayLayer];
 
+  //////////////////////////////////////////////////////////////////////
   // create videocomposition to add textLayer on base video
   AVMutableVideoComposition *textLayerComposition = [AVMutableVideoComposition videoComposition];
+
+  // set media sizes
   textLayerComposition.renderSize = size;
   textLayerComposition.frameDuration = CMTimeMake(1, 30);  // 1/30秒を１つの単位とする
   textLayerComposition.animationTool = [AVVideoCompositionCoreAnimationTool videoCompositionCoreAnimationToolWithPostProcessingAsVideoLayer:videoLayer inLayer:parentLayer];
@@ -533,6 +480,35 @@ RCT_EXPORT_METHOD
   [kDateFormatter setDateFormat:@"yyyyMMddHHmmss"];
 
 
+  ////////////////////////////////////////
+  // check component positons
+
+  NSLog(@"Test - parentLayer.frame : %@", NSStringFromCGRect(parentLayer.frame));
+  NSLog(@"Test - parentLayer.bounds: %@", NSStringFromCGRect(parentLayer.bounds));
+
+  //cview2のframeとboundsを出力
+  NSLog(@"Test - videoLayer.frame : %@", NSStringFromCGRect(videoLayer.frame));
+  NSLog(@"Test - videoLayer.bounds: %@", NSStringFromCGRect(videoLayer.bounds));
+
+  //cview2のframeとboundsを出力
+  NSLog(@"Test - overlayLayer.frame : %@", NSStringFromCGRect(overlayLayer.frame));
+  NSLog(@"Test - overlayLayer.bounds: %@", NSStringFromCGRect(overlayLayer.bounds));
+
+  //cview2のframeとboundsを出力
+  NSLog(@"Test - textLayer.frame : %@", NSStringFromCGRect(videoLayer.frame));
+  NSLog(@"Test - textLayer.bounds: %@", NSStringFromCGRect(videoLayer.bounds));
+
+  // 画面情報諸々を出力
+  // scaleを計算してログで出力
+  UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+  BOOL landscape = (orientation == UIInterfaceOrientationLandscapeLeft || orientation == UIInterfaceOrientationLandscapeRight);
+  NSLog(@"Test -Currently landscape: %@, width: %.2f, height: %.2f",
+         (landscape ? @"Yes" : @"No"),
+         [[UIScreen mainScreen] bounds].size.width,
+         [[UIScreen mainScreen] bounds].size.height);
+    
+    
+  ////////////////////////////////////////////////////////////////////////
   // export AVComposition to CameraRoll
   AVAssetExportSession *exporter = [[AVAssetExportSession alloc] initWithAsset:mixComposition presetName:AVAssetExportPresetHighestQuality];
 
