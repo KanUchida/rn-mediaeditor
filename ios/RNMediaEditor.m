@@ -36,7 +36,6 @@ RCT_EXPORT_MODULE()
   };
 }
 
-
 - (UIColor *)colorFromHexString:(NSString *)hexString Alpha:(float)alpha {
     unsigned rgbValue = 0;
     NSScanner *scanner = [NSScanner scannerWithString:hexString];
@@ -60,6 +59,8 @@ RCT_EXPORT_MODULE()
 }
 
 
+////////////////////////////////////////////////////////////////////////
+// how to use this
 // jpegData = [self returnJpgData:firstText image:()image];
 // return jpgData;
 - (NSData *)returnJpgData:(NSDictionary *)textInfo image:(UIImage *)image{
@@ -99,7 +100,7 @@ RCT_EXPORT_MODULE()
   [image drawInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
 
   // wrapper rect
-  CGRect rect = CGRectMake(0, 0, image.size.width, image.size.height);
+  // CGRect rect = CGRectMake(0, 0, image.size.width, image.size.height);
 
   // the base point of text rect
   CGPoint point = CGPointMake(left, top);
@@ -131,7 +132,7 @@ RCT_EXPORT_MODULE()
   [textColor set];
   [text drawInRect:textRect  // 文字入れる
         withFont:font  // apply font
-   lineBreakMode:UILineBreakModeClip
+     lineBreakMode:UILineBreakModeClip
        alignment:UITextAlignmentLeft ];
 
 
@@ -144,10 +145,11 @@ RCT_EXPORT_MODULE()
   return UIImageJPEGRepresentedData;
 }
 
-
+////////////////////////////////////////////////////////////////////
+// how to use this
 // [self embedTextOnCALayer:firstText targetLayer:overlayLayer]
-- (void)embedTextOnCALayer:(NSDictionary *)textInfo targetLayer:(CALayer *)layer {
-  // embed text on CALayer
+- (void)embedTextOnCALayer:(NSDictionary *)textInfo targetLayer:(CALayer *)layer isBaseVideoPortrait:(BOOL)isBaseVideoPortrait size:(CGSize *)size{
+  // embed text on CATextLayer
   CATextLayer *subtitleText = [[CATextLayer alloc] init];
   // Docs say this is supposed to be written for layer statement
   subtitleText.contentsScale = [[UIScreen mainScreen] scale];
@@ -160,13 +162,25 @@ RCT_EXPORT_MODULE()
     NSNumber *fontSizeNumber = [textInfo objectForKey:@"fontSize"];
     NSInteger fontSize = abs(fontSizeNumber.integerValue);
 
+    // fontSizeを指定
+    NSNumber *fontSizeLandscapeNumber = [textInfo objectForKey:@"fontSizeLandscape"];
+    NSInteger fontSizeLandscape = abs(fontSizeLandscapeNumber.integerValue);
+
     // fontの指定
     UIFont *font = [UIFont fontWithName:@"GenEiGothicM-R" size:fontSize];
     CGSize textSize = [text sizeWithFont:font];
 
-    // 位置指定
+    // fontの指定
+    UIFont *fontLandscape = [UIFont fontWithName:@"GenEiGothicM-R" size:fontSizeLandscape];
+    CGSize textSizeLandscape = [text sizeWithFont:fontLandscape];
+
+    // 位置指定 portrait, landscapeで向きが異なる
     NSNumber *topN = [textInfo objectForKey:@"top"];
     NSNumber *leftN = [textInfo objectForKey:@"left"];
+
+    // 位置指定 portrait, landscapeで向きが異なる
+    NSNumber *topNLandscape = [textInfo objectForKey:@"topLandscape"];
+    NSNumber *leftNLandscape = [textInfo objectForKey:@"leftLandscape"];
 
     // 行数の指定
     NSNumber *lineNumber = [textInfo objectForKey:@"lineNum"];
@@ -178,17 +192,30 @@ RCT_EXPORT_MODULE()
     NSNumber *textNumber = [textInfo objectForKey:@"textNum"];
     NSInteger textNum = abs(textNumber.intValue);
 
+
+
     // font sizeをポイントで指定
-    [subtitleText setFontSize:font.pointSize];
-    
+    if (isBaseVideoPortrait) {
+      [subtitleText setFontSize:font.pointSize];
+    } else {
+      [subtitleText setFontSize:fontLandscape.pointSize];
+    }  
 
     // 文字入力エリアの用意
     // textNumが0の可能性があるから、それで割るとエラーがでる
     NSNumber *istextInfoVertical = [textInfo objectForKey:@"vertical"];
     if ([istextInfoVertical integerValue] == 1) {
-      [subtitleText setFrame:CGRectMake(leftN.integerValue + fontSize / 6, topN.integerValue + fontSize / 6, textSize.width / textNum * lineNum, textSize.height * maxLength)];
+      if (isBaseVideoPortrait) { // portrait
+        [subtitleText setFrame:CGRectMake(leftN.integerValue + fontSize / 6, topN.integerValue + fontSize / 6, textSize.width / textNum * lineNum, textSize.height * maxLength)];
+      } else {  // vertical
+        [subtitleText setFrame:CGRectMake(leftNLandscape.integerValue + fontSizeLandscape / 6, topNLandscape.integerValue + fontSizeLandscape / 6, textSizeLandscape.width / textNum * lineNum, textSizeLandscape.height * maxLength)];
+      }
     } else {
-      [subtitleText setFrame:CGRectMake(leftN.integerValue + fontSize / 6, topN.integerValue + fontSize / 6, textSize.width / textNum * maxLength, textSize.height * lineNum)];
+      if (isBaseVideoPortrait) {  // portrait
+        [subtitleText setFrame:CGRectMake(leftN.integerValue + fontSize / 6, topNLandscape.integerValue + fontSize / 6, textSize.width / textNum * maxLength, textSize.height * lineNum)];
+      } else {  // vertical
+        [subtitleText setFrame:CGRectMake(leftNLandscape.integerValue + fontSizeLandscape / 6, topNLandscape.integerValue + fontSizeLandscape / 6, textSizeLandscape.width / textNum * maxLength, textSizeLandscape.height * lineNum)];
+      }
     }
 
     // 実際のテキストの割り当て -> align left -> contents 中央
@@ -283,14 +310,15 @@ RCT_EXPORT_METHOD
 
   // 返す
   resolve(@[@"embed text on image", jpg64Str]);
-
 }
+
 
 -(void)embedTextOnVideo:(NSDictionary *)options
                resolver:(RCTPromiseResolveBlock)resolve
                rejecter:(RCTPromiseRejectBlock)reject
 {
   // オリジナルはこれか：http://qiita.com/KUMAN/items/a2a1e903b26b062d2d79#%E5%8B%95%E7%94%BB%E5%90%88%E6%88%90%E3%81%AE%E6%B5%81%E3%82%8C
+  // deprecateされてるの多いから要修正
   self.options = options;
   NSDictionary *firstText = [options objectForKey:@"firstText"];
   NSDictionary *secondText = [options objectForKey:@"secondText"];
@@ -299,7 +327,6 @@ RCT_EXPORT_METHOD
   NSURL *url = [NSURL fileURLWithPath:urlStr];
 
   AVURLAsset *videoAsset = [AVURLAsset URLAssetWithURL:url options:nil];
-
 
   //////////////////////////////////////////////////////////////////////
   // prepare composition
@@ -312,14 +339,38 @@ RCT_EXPORT_METHOD
   AVMutableCompositionTrack *mutableCompositionVideoTrack = [mixComposition addMutableTrackWithMediaType:AVMediaTypeVideo preferredTrackID:kCMPersistentTrackID_Invalid];
   AVMutableCompositionTrack *mutableCompositionAudioTrack = [mixComposition addMutableTrackWithMediaType:AVMediaTypeAudio preferredTrackID:kCMPersistentTrackID_Invalid];
 
-  // 変更不可能な、オリジナルのトラックを取得
+  // get immutable original tracks
   AVAssetTrack *baseVideoTrack = [[videoAsset tracksWithMediaType:AVMediaTypeVideo] objectAtIndex:0];
   AVAssetTrack *baseAudioTrack = [[videoAsset tracksWithMediaType:AVMediaTypeAudio] objectAtIndex:0];
   
-  // とった動画のwidth / height を取得し、縦横入れ替え
-  CGSize size = baseVideoTrack.naturalSize;
-  size = CGSizeMake(size.height, size.width);
 
+  // check orientation
+  BOOL isBaseVideoLandscapeLeft = NO;
+  BOOL isBaseVideoLandscapeRight = NO;
+  BOOL isBaseVideoPortrait = NO;
+  BOOL isBaseVideoPortraitUpsideDown = NO;
+
+  CGAffineTransform baseVideoTransform = baseVideoTrack.preferredTransform;
+  if (baseVideoTransform.a == -1 && baseVideoTransform.b == 0 && baseVideoTransform.c == 0 && baseVideoTransform.d == -1) {
+    isBaseVideoLandscapeLeft = YES;
+    NSLog(@"UIInterfaceOrientatonLandscapeLeft");
+  } else if (baseVideoTransform.a == 1 && baseVideoTransform.b == 0 && baseVideoTransform.c == 0 && baseVideoTransform.d == 1) {
+    isBaseVideoLandscapeRight = YES;
+    NSLog(@"UIInterfaceOrientationLandscapeRight");
+  } else if (baseVideoTransform.a == 0 && baseVideoTransform.b == -1 && baseVideoTransform.c == 1 && baseVideoTransform.d == 0) {
+    isBaseVideoPortrait = YES;
+    isBaseVideoPortraitUpsideDown = YES;
+    NSLog(@"UIInterfaceOrientationPortraitUpsideDown");
+  } else {
+    isBaseVideoPortrait = YES;
+    NSLog(@"UIInterfaceOrientationPortrait");
+  }
+
+  // get size depends on orientation
+  CGSize size = baseVideoTrack.naturalSize;
+  if (isBaseVideoPortrait) {
+    size = CGSizeMake(size.height, size.width);
+  }
 
   // 取り出した、可変のトラックに、時間の要素を追加してあげる
   // 同じように、音声にも追加してあげる
@@ -339,12 +390,12 @@ RCT_EXPORT_METHOD
 
   /////////////////////////////////////////////////////////////////////
   // set background color
+  // こうすると、きれいな正方形でバックグラウンドカラーがつく？
+/*
 
   UIImage *borderImage = nil;
 
   UIColor *videoBackgroundColor = [self colorFromHexString:@"#F6F5F4" Alpha:1.0];
-  // こうすると、きれいな正方形でバックグラウンドカラーがつく？
-/*
   borderImage = [self imageWithColor:videoBackgroundColor rectSize:CGRectMake(-(size.height - size.width)/2, 0, size.width, size.width)];
 
   CALayer *backgroundLayer = [CALayer layer];
@@ -361,10 +412,13 @@ RCT_EXPORT_METHOD
   // Apply the original transform.
   // baseVideoTrackの向きがdefaultでportraits（横長でホームボタンじゃない方が上）
   // 縦固定で扱いたければ、全て入れかえて扱わなければいけない
-  CGAffineTransform translateToCenter = CGAffineTransformMakeTranslation(size.width, 0);  // 平行移動
-  CGAffineTransform rotation = CGAffineTransformMakeRotation(M_PI_2);  // 回転作業 おっけーっぽい
-  CGAffineTransform mixedTransform = CGAffineTransformConcat(rotation, translateToCenter);  // 合成
-  [layerInstruction setTransform:mixedTransform atTime:kCMTimeZero];
+
+  if (isBaseVideoPortrait) {
+    CGAffineTransform translateToCenter = CGAffineTransformMakeTranslation(size.width, 0);  // 平行移動
+    CGAffineTransform rotation = CGAffineTransformMakeRotation(M_PI_2);  // 回転作業 おっけーっぽい
+    CGAffineTransform mixedTransform = CGAffineTransformConcat(rotation, translateToCenter);  // 合成
+    [layerInstruction setTransform:mixedTransform atTime:kCMTimeZero];
+  }
 
   // 特に何をしているわけでもないけど、とりあえずlayerInstructionsをもたせているのがこの時点での状況
   // このあとも出てこないから、この辺なくても良い気がする
@@ -381,8 +435,8 @@ RCT_EXPORT_METHOD
 
   // define layer
   overlayLayer.frame = CGRectMake(0, 0, size.width, size.height);
-  [self embedTextOnCALayer:firstText targetLayer:overlayLayer];
-  [self embedTextOnCALayer:secondText targetLayer:overlayLayer];
+  [self embedTextOnCALayer:firstText targetLayer:overlayLayer isBaseVideoPortrait:isBaseVideoPortrait size:&size];
+  [self embedTextOnCALayer:secondText targetLayer:overlayLayer isBaseVideoPortrait:isBaseVideoPortrait size:&size];
 
 
   // settings for overlay layer
@@ -421,32 +475,26 @@ RCT_EXPORT_METHOD
 
   // 左上を原点にした座標を取得。そこを基準にする
   parentLayer.anchorPoint = CGPointMake(0, 0);
-  videoLayer.anchorPoint = CGPointMake(0, 0);
-  
+  videoLayer.anchorPoint = (isBaseVideoLandscapeLeft || isBaseVideoPortraitUpsideDown) ? CGPointMake(0.5, 0.5) : CGPointMake(0, 0);
+
   // 左上を原点に、横幅 size.width, 縦幅 size.heightのレクタングル（長方形）を取得
   parentLayer.frame = CGRectMake(0, 0, size.width, size.height);
   videoLayer.frame = CGRectMake(0, 0, size.width, size.height);
 
-/*
-  // check layer area
-
-  // orange if appears
-  UIColor *parentLayerColor = [self colorFromHexString:@"#f98829" Alpha:alpha2];
-  [parentLayer setBackgroundColor:[parentLayerColor CGColor]];
-
-  // blue if appears
-  UIColor *videoLayerColor = [self colorFromHexString:@"#1c1321" Alpha:alpha2];
-  [videoLayer setBackgroundColor:[videoLayerColor CGColor]];
-
-  // red if appears
-  UIColor *overlayLayerColor = [self colorFromHexString:@"#ca2e39" Alpha: 0.5];
-  [overlayLayer setBackgroundColor:[overlayLayerColor CGColor]];
-*/
-
   // 要素をparentLayerにまとめにいく
   // ひょっとしたら使われていないけど
   // [parentLayer addSublayer:backgroundLayer];
+
+  // 必要なタイミングで動画を正しい向きに回転させる
+  if (isBaseVideoLandscapeLeft || isBaseVideoPortraitUpsideDown) {
+    CGAffineTransform rotateTransform = CGAffineTransformMakeRotation(M_PI);
+    [videoLayer setAffineTransform:rotateTransform];
+  }
+
   [parentLayer addSublayer:videoLayer];
+  
+  // 文字のlayerの上乗せ
+  // parent layer回しているから、おそらく基準点ずれている
   [parentLayer addSublayer:overlayLayer];
 
   //////////////////////////////////////////////////////////////////////
