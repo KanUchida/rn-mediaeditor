@@ -111,21 +111,21 @@ RCT_EXPORT_MODULE()
   NSNumber *isTextInfoVertical = [textInfo objectForKey:@"vertical"];
 
   if ([isTextInfoVertical integerValue] == 1) {
-  NSLog(@"Vertical string");
-  textContainer = CGRectMake(point.x - fontSize / 6, point.y - fontSize / 6,
-   size.height * lineNum + fontSize / 6, size.height * maxLength + fontSize / 3);
-  CGContextFillRect(
-    UIGraphicsGetCurrentContext(),
-    textContainer
-  );
-  textRect = CGRectMake(point.x + fontSize / 6, point.y + fontSize / 6, size.height * lineNum, size.height * maxLength);
+    NSLog(@"Vertical string");
+    textContainer = CGRectMake(point.x - fontSize / 6, point.y - fontSize / 6,
+     size.height * lineNum + fontSize / 6, size.height * maxLength + fontSize / 3);
+    CGContextFillRect(
+      UIGraphicsGetCurrentContext(),
+      textContainer
+    );
+    textRect = CGRectMake(point.x, point.y, size.height * lineNum, size.height * maxLength);
   } else {
-  textContainer = CGRectMake(point.x - fontSize / 6, point.y - fontSize / 6, size.height * maxLength + fontSize / 3, size.height * lineNum + fontSize / 6);
-  CGContextFillRect(
-    UIGraphicsGetCurrentContext(),
-    textContainer
-  );
-  textRect = CGRectMake(point.x + fontSize / 6, point.y + fontSize / 6, size.height * maxLength, size.height * lineNum);
+    textContainer = CGRectMake(point.x - fontSize / 6, point.y - fontSize / 6, size.height * maxLength + fontSize / 3, size.height * lineNum + fontSize / 6);
+    CGContextFillRect(
+      UIGraphicsGetCurrentContext(),
+      textContainer
+    );
+    textRect = CGRectMake(point.x, point.y, size.height * maxLength, size.height * lineNum);
   }
 
 
