@@ -113,7 +113,7 @@ RCT_EXPORT_MODULE()
   if ([isTextInfoVertical integerValue] == 1) {
     NSLog(@"Vertical string");
     textContainer = CGRectMake(point.x - fontSize / 6, point.y - fontSize / 6,
-     size.height * lineNum + fontSize / 6, size.height * maxLength + fontSize / 3);
+     size.height * (lineNum + 10 )+ fontSize / 6, size.height * (maxLength + 10) + fontSize / 3);
     CGContextFillRect(
       UIGraphicsGetCurrentContext(),
       textContainer
@@ -206,15 +206,15 @@ RCT_EXPORT_MODULE()
     NSNumber *istextInfoVertical = [textInfo objectForKey:@"vertical"];
     if ([istextInfoVertical integerValue] == 1) {
       if (isBaseVideoPortrait) { // portrait
-        [subtitleText setFrame:CGRectMake(leftN.integerValue + fontSize / 6, topN.integerValue + fontSize / 6, textSize.width / textNum * lineNum, textSize.height * maxLength)];
+        [subtitleText setFrame:CGRectMake(leftN.integerValue + fontSize / 6, topN.integerValue + fontSize / 6, textSize.width / textNum * (lineNum + 10), textSize.height * (maxLength + 10))];
       } else {  // vertical
-        [subtitleText setFrame:CGRectMake(leftNLandscape.integerValue + fontSizeLandscape / 6, topNLandscape.integerValue + fontSizeLandscape / 6, textSizeLandscape.width / textNum * lineNum, textSizeLandscape.height * maxLength)];
+        [subtitleText setFrame:CGRectMake(leftNLandscape.integerValue + fontSizeLandscape / 6, topNLandscape.integerValue + fontSizeLandscape / 6, textSizeLandscape.width / textNum * (lineNum + 10), textSizeLandscape.height * (maxLength + 10))];
       }
     } else {
       if (isBaseVideoPortrait) {  // portrait
-        [subtitleText setFrame:CGRectMake(leftN.integerValue + fontSize / 6, topNLandscape.integerValue + fontSize / 6, textSize.width / textNum * maxLength, textSize.height * lineNum)];
+        [subtitleText setFrame:CGRectMake(leftN.integerValue + fontSize / 6, topNLandscape.integerValue + fontSize / 6, textSize.width / textNum * (maxLength + 10), textSize.height * (lineNum + 10))];
       } else {  // vertical
-        [subtitleText setFrame:CGRectMake(leftNLandscape.integerValue + fontSizeLandscape / 6, topNLandscape.integerValue + fontSizeLandscape / 6, textSizeLandscape.width / textNum * maxLength, textSizeLandscape.height * lineNum)];
+        [subtitleText setFrame:CGRectMake(leftNLandscape.integerValue + fontSizeLandscape / 6, topNLandscape.integerValue + fontSizeLandscape / 6, textSizeLandscape.width / textNum * (maxLength + 10), textSizeLandscape.height * (lineNum + 10))];
       }
     }
 
