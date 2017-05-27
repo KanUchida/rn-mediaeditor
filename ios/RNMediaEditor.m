@@ -91,7 +91,8 @@ RCT_EXPORT_MODULE()
   NSString *text = [textInfo objectForKey:@"text"];
 
   // create font and size of font
-  UIFont *font = [UIFont boldSystemFontOfSize:fontSize];
+    NSString *fontFamily = [textInfo objectForKey:@"fontFamily"];
+  UIFont *font = [UIFont fontWithName:fontFamily size:fontSize];
   CGSize size = [text sizeWithFont:font];
 
   // create rect of image
@@ -157,7 +158,9 @@ RCT_EXPORT_MODULE()
 
   if ([text length] != 0) {
     // font指定
-    [subtitleText setFont:@"GenEiGothicM-R"];
+
+      NSString *fontFamily = [textInfo objectForKey:@"fontFamily"];
+    [subtitleText setFont:(__bridge CFTypeRef _Nullable)(fontFamily)];
     // fontSizeを指定
     NSNumber *fontSizeNumber = [textInfo objectForKey:@"fontSize"];
     NSInteger fontSize = abs(fontSizeNumber.integerValue);
@@ -167,11 +170,11 @@ RCT_EXPORT_MODULE()
     NSInteger fontSizeLandscape = abs(fontSizeLandscapeNumber.integerValue);
 
     // fontの指定
-    UIFont *font = [UIFont fontWithName:@"GenEiGothicM-R" size:fontSize];
+    UIFont *font = [UIFont fontWithName:fontFamily size:fontSize];
     CGSize textSize = [text sizeWithFont:font];
 
     // fontの指定
-    UIFont *fontLandscape = [UIFont fontWithName:@"GenEiGothicM-R" size:fontSizeLandscape];
+    UIFont *fontLandscape = [UIFont fontWithName:fontFamily size:fontSizeLandscape];
     CGSize textSizeLandscape = [text sizeWithFont:fontLandscape];
 
     // 位置指定 portrait, landscapeで向きが異なる
