@@ -333,6 +333,8 @@ RCT_EXPORT_METHOD
   self.options = options;
   NSDictionary *firstText = [options objectForKey:@"firstText"];
   NSDictionary *secondText = [options objectForKey:@"secondText"];
+  NSDictionary *thirdText = [options objectForKey:@"thirdText"];
+  NSDictionary *fourthText = [options objectForKey:@"fourthText"];
 
   NSString *urlStr = [options objectForKey:@"path"];
   NSURL *url = [NSURL fileURLWithPath:urlStr];
@@ -448,6 +450,8 @@ RCT_EXPORT_METHOD
   overlayLayer.frame = CGRectMake(0, 0, size.width, size.height);
   [self embedTextOnCALayer:firstText targetLayer:overlayLayer isBaseVideoPortrait:isBaseVideoPortrait size:&size];
   [self embedTextOnCALayer:secondText targetLayer:overlayLayer isBaseVideoPortrait:isBaseVideoPortrait size:&size];
+  [self embedTextOnCALayer:thirdText targetLayer:overlayLayer isBaseVideoPortrait:isBaseVideoPortrait size:&size];
+  [self embedTextOnCALayer:fourthText targetLayer:overlayLayer isBaseVideoPortrait:isBaseVideoPortrait size:&size];
 
 
   // settings for overlay layer
