@@ -291,6 +291,8 @@ RCT_EXPORT_METHOD
   self.options = options;
   NSDictionary *firstText = [options objectForKey:@"firstText"];
   NSDictionary *secondText = [options objectForKey:@"secondText"];
+  NSDictionary *thirdText = [options objectForKey:@"thirdText"];
+  NSDictionary *fourthText = [options objectForKey:@"fourthText"];
 
   NSString *base64str = [options objectForKey:@"data"];
   NSData *data = [[NSData alloc]
@@ -305,8 +307,17 @@ RCT_EXPORT_METHOD
   UIImage *image2 = [UIImage imageWithData:jpgData];
   NSData* jpgData2 = [self returnJpgData:secondText image:image2];
 
+
+  // 3文字目の埋め込み
+  UIImage *image3 = [UIImage imageWithData:jpgData2];
+  NSData* jpgData3 = [self returnJpgData:thirdText image:image3];
+
+  // 4文字目の埋め込み
+  UIImage *image4 = [UIImage imageWithData:jpgData3];
+  NSData* jpgData4 = [self returnJpgData:fourthText image:image4];
+
   // base64 encoding 
-  NSString* jpg64Str = [jpgData2 base64EncodedStringWithOptions:NSDataBase64Encoding76CharacterLineLength];
+  NSString* jpg64Str = [jpgData4 base64EncodedStringWithOptions:NSDataBase64Encoding76CharacterLineLength];
 
   // 返す
   resolve(@[@"embed text on image", jpg64Str]);
