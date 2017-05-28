@@ -66,7 +66,7 @@ RCT_EXPORT_MODULE()
 - (NSData *)returnJpgData:(NSDictionary *)textInfo image:(UIImage *)image{
   // again to second text
   NSNumber *fontSizeNumber = [textInfo objectForKey:@"fontSize"];
-  NSInteger fontSize = abs(fontSizeNumber.intValue);
+  float fontSize = fabsf(fontSizeNumber.floatValue);
 
   NSNumber *lineNumber = [textInfo objectForKey:@"lineNum"];
   NSInteger lineNum = abs(lineNumber.intValue);
@@ -163,11 +163,11 @@ RCT_EXPORT_MODULE()
     [subtitleText setFont:(__bridge CFTypeRef _Nullable)(fontFamily)];
     // fontSizeを指定
     NSNumber *fontSizeNumber = [textInfo objectForKey:@"fontSize"];
-    NSInteger fontSize = abs(fontSizeNumber.integerValue);
+    float fontSize = fabsf(fontSizeNumber.floatValue);
 
     // fontSizeを指定
     NSNumber *fontSizeLandscapeNumber = [textInfo objectForKey:@"fontSizeLandscape"];
-    NSInteger fontSizeLandscape = abs(fontSizeLandscapeNumber.integerValue);
+    float fontSizeLandscape = fabsf(fontSizeLandscapeNumber.floatValue);
 
     // fontの指定
     UIFont *font = [UIFont fontWithName:fontFamily size:fontSize];
@@ -202,7 +202,7 @@ RCT_EXPORT_MODULE()
       [subtitleText setFontSize:font.pointSize];
     } else {
       [subtitleText setFontSize:fontLandscape.pointSize];
-    }  
+    }
 
     // 文字入力エリアの用意
     // textNumが0の可能性があるから、それで割るとエラーがでる
@@ -354,12 +354,13 @@ RCT_EXPORT_METHOD
   // ここでは、VideoとAudioを別々に取得している
   AVMutableCompositionTrack *mutableCompositionVideoTrack = [mixComposition addMutableTrackWithMediaType:AVMediaTypeVideo preferredTrackID:kCMPersistentTrackID_Invalid];
   AVMutableCompositionTrack *mutableCompositionAudioTrack = [mixComposition addMutableTrackWithMediaType:AVMediaTypeAudio preferredTrackID:kCMPersistentTrackID_Invalid];
-
+    
   // get immutable original tracks
+  // これがとれなくなってる
+  // カメラロールからではとれない。diskからとらないとout
   AVAssetTrack *baseVideoTrack = [[videoAsset tracksWithMediaType:AVMediaTypeVideo] objectAtIndex:0];
   AVAssetTrack *baseAudioTrack = [[videoAsset tracksWithMediaType:AVMediaTypeAudio] objectAtIndex:0];
   
-
   // check orientation
   BOOL isBaseVideoLandscapeLeft = NO;
   BOOL isBaseVideoLandscapeRight = NO;
