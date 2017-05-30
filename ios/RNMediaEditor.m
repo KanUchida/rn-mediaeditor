@@ -215,7 +215,7 @@ RCT_EXPORT_MODULE()
       }
     } else {
       if (isBaseVideoPortrait) {  // portrait
-        [subtitleText setFrame:CGRectMake(leftN.integerValue + fontSize / 6, topNLandscape.integerValue + fontSize / 6, textSize.width / textNum * (maxLength + 10), textSize.height * (lineNum + 10))];
+        [subtitleText setFrame:CGRectMake(leftN.integerValue + fontSize / 6, topN.integerValue + fontSize / 6, textSize.width / textNum * (maxLength + 10), textSize.height * (lineNum + 10))];
       } else {  // vertical
         [subtitleText setFrame:CGRectMake(leftNLandscape.integerValue + fontSizeLandscape / 6, topNLandscape.integerValue + fontSizeLandscape / 6, textSizeLandscape.width / textNum * (maxLength + 10), textSizeLandscape.height * (lineNum + 10))];
       }
